@@ -11,6 +11,12 @@ public class ReleaseRequestDto {
     public ReleaseRequestDto() {
     }
 
+    public ReleaseRequestDto(Long id, String version, LocalDateTime startTime) {
+        this.id = id;
+        this.version = version;
+        this.startTime = startTime;
+    }
+
     public ReleaseRequestDto(
             Long id,
             String version,

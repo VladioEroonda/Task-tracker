@@ -15,6 +15,12 @@ public class TaskRequestDto {
     public TaskRequestDto() {
     }
 
+    public TaskRequestDto(Long id, String name, TaskStatus status) {
+        this.id = id;
+        this.name = name;
+        this.status = status;
+    }
+
     public TaskRequestDto(
             Long id,
             String name,

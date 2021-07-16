@@ -18,6 +18,12 @@ public class TaskResponseDto {
     public TaskResponseDto() {
     }
 
+    public TaskResponseDto(Long id, String name, TaskStatus status) {
+        this.id = id;
+        this.name = name;
+        this.status = status;
+    }
+
     public TaskResponseDto(
             Long id,
             String name,

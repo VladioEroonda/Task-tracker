@@ -3,6 +3,7 @@ package com.github.vladioeroonda.tasktracker.dto.response;
 import java.time.LocalDateTime;
 
 public class ReleaseResponseDto {
+    private Long id;
     private String version;
     private LocalDateTime startTime;
     private LocalDateTime finishTime;
@@ -10,14 +11,25 @@ public class ReleaseResponseDto {
     public ReleaseResponseDto() {
     }
 
-    public ReleaseResponseDto(
-            String version,
-            LocalDateTime startTime,
-            LocalDateTime finishTime
-    ) {
+    public ReleaseResponseDto(Long id, String version, LocalDateTime startTime) {
+        this.id = id;
+        this.version = version;
+        this.startTime = startTime;
+    }
+
+    public ReleaseResponseDto(Long id, String version, LocalDateTime startTime, LocalDateTime finishTime) {
+        this.id = id;
         this.version = version;
         this.startTime = startTime;
         this.finishTime = finishTime;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getVersion() {
