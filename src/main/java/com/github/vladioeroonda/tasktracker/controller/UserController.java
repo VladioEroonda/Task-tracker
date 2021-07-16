@@ -3,6 +3,8 @@ package com.github.vladioeroonda.tasktracker.controller;
 import com.github.vladioeroonda.tasktracker.dto.request.UserRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.UserResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.UserNotFoundException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "Пользователь", description = "Отвечает за CRUD операции, связанные с Пользователем")
 @RestController
 @RequestMapping("/api/tracker")
 public class UserController {
@@ -30,6 +33,7 @@ public class UserController {
         this.modelMapper = modelMapper;
     }
 
+    @Operation(summary = "Получение списка всех Пользователей")
     @GetMapping(value = "/users")
     public ResponseEntity<List<UserResponseDto>> getAllUsers() {
         UserResponseDto user1 = new UserResponseDto(
@@ -47,6 +51,7 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @Operation(summary = "Получение конкретного Пользователя по его id")
     @GetMapping(value = "/users/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
 
@@ -63,6 +68,7 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @Operation(summary = "Добавление нового Пользователя")
     @PostMapping(value = "/users")
     public ResponseEntity<UserResponseDto> addNewUser(@RequestBody UserRequestDto requestDto) {
         UserResponseDto user = convertFromRequestToResponseDto(requestDto);
@@ -70,6 +76,7 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Изменение Пользователя")
     @PutMapping(value = "/users")
     public ResponseEntity<UserResponseDto> editUser(@RequestBody UserRequestDto requestDto) {
         UserResponseDto user = convertFromRequestToResponseDto(requestDto);
@@ -77,6 +84,7 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @Operation(summary = "Удаление конкретного Пользователя по его id")
     @DeleteMapping(value = "/users/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
         String info = "Пользователь с id #" + id + " был успешно удалён";

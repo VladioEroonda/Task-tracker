@@ -1,18 +1,25 @@
 package com.github.vladioeroonda.tasktracker.dto.response;
 
-import com.github.vladioeroonda.tasktracker.dto.request.ProjectRequestDto;
-import com.github.vladioeroonda.tasktracker.dto.request.ReleaseRequestDto;
-import com.github.vladioeroonda.tasktracker.dto.request.UserRequestDto;
 import com.github.vladioeroonda.tasktracker.model.TaskStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Сущность Задачи(ответ)")
 public class TaskResponseDto {
+    @Schema(description = "ID Задачи")
     private Long id;
+    @Schema(description = "Тема Задачи")
     private String name;
+    @Schema(description = "Описание Задачи")
     private String description;
+    @Schema(description = "Статус Задачи")
     private TaskStatus status;
+    @Schema(description = "Проект, к которому относится Задача")
     private ProjectResponseDto project;
+    @Schema(description = "Информация по релизу Задачи")
     private ReleaseResponseDto release;
+    @Schema(description = "Автор Задачи")
     private UserResponseDto author;
+    @Schema(description = "Исполнитель Задачи")
     private UserResponseDto executor;
 
     public TaskResponseDto() {

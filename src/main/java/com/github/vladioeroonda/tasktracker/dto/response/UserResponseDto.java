@@ -1,8 +1,14 @@
 package com.github.vladioeroonda.tasktracker.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Сущность Пользователя(ответ)")
 public class UserResponseDto {
+    @Schema(description = "ID Пользователя")
     private Long id;
+    @Schema(description = "Логин Пользователя")
     private String login;
+    @Schema(description = "ФИО Пользователя")
     private String name;
 
     public UserResponseDto() {

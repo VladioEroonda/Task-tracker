@@ -1,11 +1,17 @@
 package com.github.vladioeroonda.tasktracker.dto.response;
 
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Сущность Проекта(ответ)")
 public class ProjectResponseDto {
+    @Schema(description = "Id Проекта")
     private Long id;
+    @Schema(description = "Название Проекта")
     private String name;
+    @Schema(description = "Статус Проекта")
     private ProjectStatus status;
+    @Schema(description = "Заказчик Проекта")
     private UserResponseDto customer;
 
     public ProjectResponseDto() {

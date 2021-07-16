@@ -4,6 +4,8 @@ import com.github.vladioeroonda.tasktracker.dto.request.TaskRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.TaskResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.TaskNotFoundException;
 import com.github.vladioeroonda.tasktracker.model.TaskStatus;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "Задача", description = "Отвечает за CRUD операции, связанные с Задачей")
 @RestController
 @RequestMapping("/api/tracker")
 public class TaskController {
@@ -31,6 +34,7 @@ public class TaskController {
         this.modelMapper = modelMapper;
     }
 
+    @Operation(summary = "Получение списка всех Задач")
     @GetMapping(value = "/tasks")
     public ResponseEntity<List<TaskResponseDto>> getAllTasks() {
         TaskResponseDto task1 = new TaskResponseDto(
@@ -48,6 +52,7 @@ public class TaskController {
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
+    @Operation(summary = "Получение конкретной Задачи по её id")
     @GetMapping(value = "/tasks/{id}")
     public ResponseEntity<TaskResponseDto> getTaskById(@PathVariable Long id) {
 
@@ -64,6 +69,7 @@ public class TaskController {
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 
+    @Operation(summary = "Добавление новой Задачи")
     @PostMapping(value = "/tasks")
     public ResponseEntity<TaskResponseDto> addNewTask(@RequestBody TaskRequestDto requestDto) {
         TaskResponseDto task = convertFromRequestToResponseDto(requestDto);
@@ -71,6 +77,7 @@ public class TaskController {
         return new ResponseEntity<>(task, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Изменение Задачи")
     @PutMapping(value = "/tasks")
     public ResponseEntity<TaskResponseDto> editTask(@RequestBody TaskRequestDto requestDto) {
         TaskResponseDto task = convertFromRequestToResponseDto(requestDto);
@@ -78,6 +85,7 @@ public class TaskController {
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 
+    @Operation(summary = "Удаление конкретной Задачи по её id")
     @DeleteMapping(value = "/tasks/{id}")
     public ResponseEntity<String> deleteTaskById(@PathVariable Long id) {
         String info = "Задача с id #" + id + " была успешно удалена";

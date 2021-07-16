@@ -1,11 +1,18 @@
 package com.github.vladioeroonda.tasktracker.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDateTime;
 
+@Schema(description = "Сущность Релиза(ответ)")
 public class ReleaseResponseDto {
+    @Schema(description = "ID Релиза")
     private Long id;
+    @Schema(description = "Версия Релиза", example = "0.0.1")
     private String version;
+    @Schema(description = "Время начала выполнения Релиза")
     private LocalDateTime startTime;
+    @Schema(description = "Время завершения работ Релиза")
     private LocalDateTime finishTime;
 
     public ReleaseResponseDto() {

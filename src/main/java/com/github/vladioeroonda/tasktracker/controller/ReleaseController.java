@@ -3,6 +3,8 @@ package com.github.vladioeroonda.tasktracker.controller;
 import com.github.vladioeroonda.tasktracker.dto.request.ReleaseRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ReleaseResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.ReleaseNotFoundException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Tag(name = "Релиз", description = "Отвечает за CRUD операции, связанные с Релизом")
 @RestController
 @RequestMapping("/api/tracker")
 public class ReleaseController {
@@ -31,6 +34,7 @@ public class ReleaseController {
         this.modelMapper = modelMapper;
     }
 
+    @Operation(summary = "Получение списка всех Релизов")
     @GetMapping(value = "/releases")
     public ResponseEntity<List<ReleaseResponseDto>> getAllReleases() {
         ReleaseResponseDto release1 = new ReleaseResponseDto(
@@ -48,6 +52,7 @@ public class ReleaseController {
         return new ResponseEntity<>(releases, HttpStatus.OK);
     }
 
+    @Operation(summary = "Получение конкретного Релиза по его id")
     @GetMapping(value = "/releases/{id}")
     public ResponseEntity<ReleaseResponseDto> getReleaseById(@PathVariable Long id) {
 
@@ -64,6 +69,7 @@ public class ReleaseController {
         return new ResponseEntity<>(release, HttpStatus.OK);
     }
 
+    @Operation(summary = "Добавление нового Релиза")
     @PostMapping(value = "/releases")
     public ResponseEntity<ReleaseResponseDto> addNewRelease(@RequestBody ReleaseRequestDto requestDto) {
         ReleaseResponseDto release = convertFromRequestToResponseDto(requestDto);
@@ -71,6 +77,7 @@ public class ReleaseController {
         return new ResponseEntity<>(release, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Изменение Релиза")
     @PutMapping(value = "/releases")
     public ResponseEntity<ReleaseResponseDto> editRelease(@RequestBody ReleaseRequestDto requestDto) {
         ReleaseResponseDto release = convertFromRequestToResponseDto(requestDto);
@@ -78,6 +85,7 @@ public class ReleaseController {
         return new ResponseEntity<>(release, HttpStatus.OK);
     }
 
+    @Operation(summary = "Удаление конкретного Релиза по его id")
     @DeleteMapping(value = "/releases/{id}")
     public ResponseEntity<String> deleteReleaseById(@PathVariable Long id) {
         String info = "Релиз с id #" + id + " был успешно удалён";

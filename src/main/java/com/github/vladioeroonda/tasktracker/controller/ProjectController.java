@@ -5,6 +5,8 @@ import com.github.vladioeroonda.tasktracker.dto.response.ProjectResponseDto;
 import com.github.vladioeroonda.tasktracker.dto.response.UserResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.ProjectNotFoundException;
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name="Проект", description="Отвечает за CRUD операции, связанные с Проектом")
 @RestController
 @RequestMapping("/api/tracker")
 public class ProjectController {
@@ -32,6 +35,7 @@ public class ProjectController {
         this.modelMapper = modelMapper;
     }
 
+    @Operation(summary = "Получение списка всех Проектов")
     @GetMapping(value = "/projects")
     public ResponseEntity<List<ProjectResponseDto>> getAllProjects() {
         ProjectResponseDto project = new ProjectResponseDto(
@@ -45,6 +49,7 @@ public class ProjectController {
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 
+    @Operation(summary = "Получение конкретного Проекта по его id")
     @GetMapping(value = "/projects/{id}")
     public ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable Long id) {
         //ProjectResponseDto project = projectService.getById(id);
@@ -63,6 +68,7 @@ public class ProjectController {
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 
+    @Operation(summary = "Добавление нового Проекта")
     @PostMapping(value = "/projects")
     public ResponseEntity<ProjectResponseDto> addNewProject(@RequestBody ProjectRequestDto requestDto) {
         ProjectResponseDto project = convertFromRequestToResponseDto(requestDto);
@@ -70,6 +76,7 @@ public class ProjectController {
         return new ResponseEntity<>(project, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Изменение Проекта")
     @PutMapping(value = "/projects")
     public ResponseEntity<ProjectResponseDto> editProject(@RequestBody ProjectRequestDto requestDto) {
         ProjectResponseDto project = convertFromRequestToResponseDto(requestDto);
@@ -77,6 +84,7 @@ public class ProjectController {
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 
+    @Operation(summary = "Удаление конкретного Проекта по его id")
     @DeleteMapping(value = "/projects/{id}")
     public ResponseEntity<String> deleteProjectById(@PathVariable Long id) {
         //projectService.deleteById(id);
