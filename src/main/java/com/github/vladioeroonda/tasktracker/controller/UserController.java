@@ -22,7 +22,7 @@ import java.util.List;
 
 @Tag(name = "Пользователь", description = "Отвечает за CRUD операции, связанные с Пользователем")
 @RestController
-@RequestMapping("/api/tracker/users")
+@RequestMapping("/api/tracker/user")
 public class UserController {
 
     private final ModelMapper modelMapper;

@@ -23,7 +23,7 @@ import java.util.List;
 
 @Tag(name = "Задача", description = "Отвечает за CRUD операции, связанные с Задачей")
 @RestController
-@RequestMapping("/api/tracker/tasks")
+@RequestMapping("/api/tracker/task")
 public class TaskController {
 
     private final ModelMapper modelMapper;

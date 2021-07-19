@@ -23,7 +23,7 @@ import java.util.List;
 
 @Tag(name = "Релиз", description = "Отвечает за CRUD операции, связанные с Релизом")
 @RestController
-@RequestMapping("/api/tracker/releases")
+@RequestMapping("/api/tracker/release")
 public class ReleaseController {
 
     private final ModelMapper modelMapper;
