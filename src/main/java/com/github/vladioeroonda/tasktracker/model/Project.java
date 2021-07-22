@@ -25,9 +25,8 @@ public class Project {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
-    @Column(nullable = false)
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User customer;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "project", orphanRemoval = true)
     private List<Task> tasks;

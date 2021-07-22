@@ -24,17 +24,14 @@ public class Task {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TaskStatus taskStatus;
-    @Column(nullable = false)
     @ManyToOne
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
-    @Column(nullable = false)
     @ManyToOne
-    @JoinColumn(name = "release_id")
+    @JoinColumn(name = "release_id", nullable = false)
     private Release release;
-    @Column(nullable = false)
     @ManyToOne
-    @JoinColumn(name = "author_id")
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
     @ManyToOne
     @JoinColumn(name = "executor_id")
