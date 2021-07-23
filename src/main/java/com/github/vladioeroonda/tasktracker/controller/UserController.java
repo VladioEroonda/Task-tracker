@@ -3,9 +3,9 @@ package com.github.vladioeroonda.tasktracker.controller;
 import com.github.vladioeroonda.tasktracker.dto.request.UserRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.UserResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.UserNotFoundException;
+import com.github.vladioeroonda.tasktracker.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,75 +25,52 @@ import java.util.List;
 @RequestMapping("/api/tracker/user")
 public class UserController {
 
-    private final ModelMapper modelMapper;
+    private final UserService userService;
 
-    public UserController(ModelMapper modelMapper) {
-        this.modelMapper = modelMapper;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @Operation(summary = "Получение списка всех Пользователей")
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> getAllUsers() {
-        UserResponseDto user1 = new UserResponseDto(
-                1L,
-                "user1",
-                "User1 user1"
-        );
-        UserResponseDto user2 = new UserResponseDto(
-                2L,
-                "user2",
-                "User2 User2"
-        );
-
-        List<UserResponseDto> users = List.of(user1, user2);
+        List<UserResponseDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @Operation(summary = "Получение конкретного Пользователя по его id")
     @GetMapping(value = "/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
-
-        UserResponseDto user = new UserResponseDto(
-                1L,
-                "user1",
-                "User1 user1"
-        );
-
+        UserResponseDto user = userService.getUserById(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @Operation(summary = "Добавление нового Пользователя")
     @PostMapping
     public ResponseEntity<UserResponseDto> addNewUser(@RequestBody UserRequestDto requestDto) {
-        UserResponseDto user = convertFromRequestToResponseDto(requestDto);
-
+        UserResponseDto user = userService.addUser(requestDto);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Изменение Пользователя")
     @PutMapping
-    public ResponseEntity<UserResponseDto> editUser(@RequestBody UserRequestDto requestDto) {
-        UserResponseDto user = convertFromRequestToResponseDto(requestDto);
-
+    public ResponseEntity<UserResponseDto> updateUser(@RequestBody UserRequestDto requestDto) {
+        UserResponseDto user = userService.updateUser(requestDto);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @Operation(summary = "Удаление конкретного Пользователя по его id")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
-
+        userService.deleteUser(id);
         return new ResponseEntity<>(
                 String.format("Пользователь с id #%s был успешно удалён", id),
                 HttpStatus.OK
         );
     }
 
-    private UserResponseDto convertFromRequestToResponseDto(UserRequestDto requestDto) {
-        return modelMapper.map(requestDto, UserResponseDto.class);
-    }
-
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity handleNotFoundException(UserNotFoundException e) {
-        return new ResponseEntity(HttpStatus.NOT_FOUND);
+        return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }

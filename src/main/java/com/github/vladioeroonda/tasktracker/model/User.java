@@ -14,11 +14,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "user")
+@Table(name = "user", schema = "public")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +30,7 @@ public class User {
     @Column(nullable = false)
     private String name;
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(name = "user_role", schema = "public", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "author", orphanRemoval = true)
@@ -100,5 +102,53 @@ public class User {
 
     public void setTasksAsExecutor(List<Task> tasksAsExecutor) {
         this.tasksAsExecutor = tasksAsExecutor;
+    }
+
+    public void addAuthorTask(Task task) {
+        if (this.tasksAsAuthor == null) {
+            this.tasksAsAuthor = new ArrayList<>();
+        }
+        task.setAuthor(this);
+        this.tasksAsAuthor.add(task);
+    }
+
+    public void removeAuthorTask(Task task) {
+        if (this.tasksAsAuthor != null) {
+            task.setAuthor(null);
+            this.tasksAsAuthor.remove(task);
+        }
+    }
+
+    public void addExecutorTask(Task task) {
+        if (this.tasksAsExecutor == null) {
+            this.tasksAsExecutor = new ArrayList<>();
+        }
+        task.setExecutor(this);
+        this.tasksAsExecutor.add(task);
+    }
+
+    public void removeExecutorTask(Task task) {
+        if (this.tasksAsExecutor != null) {
+            task.setExecutor(null);
+            this.tasksAsExecutor.remove(task);
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) &&
+                Objects.equals(login, user.login) &&
+                Objects.equals(name, user.name) &&
+                Objects.equals(roles, user.roles) &&
+                Objects.equals(tasksAsAuthor, user.tasksAsAuthor) &&
+                Objects.equals(tasksAsExecutor, user.tasksAsExecutor);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, login, name, roles, tasksAsAuthor, tasksAsExecutor);
     }
 }

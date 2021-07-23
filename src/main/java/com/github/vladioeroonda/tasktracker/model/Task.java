@@ -10,9 +10,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.util.Objects;
 
 @Entity
-@Table(name = "task")
+@Table(name = "task", schema = "public")
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +24,7 @@ public class Task {
     private String description;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TaskStatus taskStatus;
+    private TaskStatus status;
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
@@ -40,20 +41,20 @@ public class Task {
     public Task() {
     }
 
-    public Task(String name, String description, TaskStatus taskStatus, Project project, Release release, User author) {
+    public Task(String name, String description, TaskStatus status, Project project, Release release, User author) {
         this.name = name;
         this.description = description;
-        this.taskStatus = taskStatus;
+        this.status = status;
         this.project = project;
         this.release = release;
         this.author = author;
     }
 
-    public Task(Long id, String name, String description, TaskStatus taskStatus, Project project, Release release, User author, User executor) {
+    public Task(Long id, String name, String description, TaskStatus status, Project project, Release release, User author, User executor) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.taskStatus = taskStatus;
+        this.status = status;
         this.project = project;
         this.release = release;
         this.author = author;
@@ -84,12 +85,12 @@ public class Task {
         this.description = description;
     }
 
-    public TaskStatus getTaskStatus() {
-        return taskStatus;
+    public TaskStatus getStatus() {
+        return status;
     }
 
-    public void setTaskStatus(TaskStatus taskStatus) {
-        this.taskStatus = taskStatus;
+    public void setStatus(TaskStatus status) {
+        this.status = status;
     }
 
     public Project getProject() {
@@ -122,5 +123,25 @@ public class Task {
 
     public void setExecutor(User executor) {
         this.executor = executor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return Objects.equals(id, task.id) &&
+                Objects.equals(name, task.name) &&
+                Objects.equals(description, task.description) &&
+                status == task.status &&
+                Objects.equals(project, task.project) &&
+                Objects.equals(release, task.release) &&
+                Objects.equals(author, task.author) &&
+                Objects.equals(executor, task.executor);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, status, project, release, author, executor);
     }
 }

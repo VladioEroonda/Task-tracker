@@ -1,6 +1,9 @@
 package com.github.vladioeroonda.tasktracker.dto.request;
 
+import com.github.vladioeroonda.tasktracker.model.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.Set;
 
 @Schema(description = "Сущность Пользователя(запрос)")
 public class UserRequestDto {
@@ -10,6 +13,8 @@ public class UserRequestDto {
     private String login;
     @Schema(description = "ФИО Пользователя")
     private String name;
+    @Schema(description = "Роли Пользователя")
+    private Set<Role> roles;
 
     public UserRequestDto() {
     }
@@ -46,5 +51,13 @@ public class UserRequestDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }

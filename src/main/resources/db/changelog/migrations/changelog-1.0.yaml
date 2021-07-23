@@ -9,10 +9,10 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: INT8
+                  type: SERIAL
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
-                    nullable: false
               - column:
                   name: login
                   type: VARCHAR(255)
@@ -34,7 +34,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: user_id
-                  type: INT8
+                  type: BIGINT
                   constraints:
                     nullable: false
                     foreignKeyName: fk_user_user_role
@@ -52,10 +52,10 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: INT8
+                  type: SERIAL
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
-                    nullable: false
               - column:
                   name: name
                   type: VARCHAR(255)
@@ -68,7 +68,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: customer_id
-                  type: INT8
+                  type: BIGINT
                   constraints:
                     nullable: false
                     foreignKeyName: fk_project_user
@@ -83,10 +83,10 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: INT8
+                  type: SERIAL
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
-                    nullable: false
               - column:
                   name: version
                   type: VARCHAR(255)
@@ -111,10 +111,10 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: INT8
+                  type: SERIAL
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
-                    nullable: false
               - column:
                   name: name
                   type: VARCHAR(255)
@@ -132,28 +132,29 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: project_id
-                  type: INT8
+                  type: BIGINT
                   constraints:
                     nullable: false
                     references: project(id)
                     foreignKeyName: fk_task_project
               - column:
                   name: release_id
-                  type: INT8
+                  type: BIGINT
                   constraints:
                     nullable: false
                     foreignKeyName: fk_task_release
                     references: release(id)
               - column:
                   name: author_id
-                  type: INT8
+                  type: BIGINT
                   constraints:
                     nullable: false
                     foreignKeyName: fk_task_author
                     references: user(id)
               - column:
                   name: executor_id
-                  type: INT8
+                  type: BIGINT
                   constraints:
                     foreignKeyName: fk_task_executor
                     references: user(id)
+                    nullable: true

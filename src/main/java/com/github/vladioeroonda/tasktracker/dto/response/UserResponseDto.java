@@ -1,6 +1,9 @@
 package com.github.vladioeroonda.tasktracker.dto.response;
 
+import com.github.vladioeroonda.tasktracker.model.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.Set;
 
 @Schema(description = "Сущность Пользователя(ответ)")
 public class UserResponseDto {
@@ -10,6 +13,8 @@ public class UserResponseDto {
     private String login;
     @Schema(description = "ФИО Пользователя")
     private String name;
+    @Schema(description = "Роли Пользователя")
+    private Set<Role> roles;
 
     public UserResponseDto() {
     }
@@ -46,5 +51,13 @@ public class UserResponseDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }

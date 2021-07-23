@@ -2,12 +2,10 @@ package com.github.vladioeroonda.tasktracker.controller;
 
 import com.github.vladioeroonda.tasktracker.dto.request.ProjectRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ProjectResponseDto;
-import com.github.vladioeroonda.tasktracker.dto.response.UserResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.ProjectNotFoundException;
-import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
+import com.github.vladioeroonda.tasktracker.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,72 +25,52 @@ import java.util.List;
 @RequestMapping("/api/tracker/project")
 public class ProjectController {
 
-    private final ModelMapper modelMapper;
+    private final ProjectService projectService;
 
-    public ProjectController(ModelMapper modelMapper) {
-        this.modelMapper = modelMapper;
+    public ProjectController(ProjectService projectService) {
+        this.projectService = projectService;
     }
 
     @Operation(summary = "Получение списка всех Проектов")
     @GetMapping
     public ResponseEntity<List<ProjectResponseDto>> getAllProjects() {
-        ProjectResponseDto project = new ProjectResponseDto(
-                1L,
-                "First one",
-                ProjectStatus.IN_PROGRESS,
-                new UserResponseDto(1L, "ivan123", "Ivan Ivanov")
-        );
-
-        List<ProjectResponseDto> projects = List.of(project);
+        List<ProjectResponseDto> projects = projectService.getAllProjects();
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 
     @Operation(summary = "Получение конкретного Проекта по его id")
     @GetMapping(value = "/{id}")
     public ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable Long id) {
-
-        ProjectResponseDto project = new ProjectResponseDto(
-                1L,
-                "First one",
-                ProjectStatus.IN_PROGRESS,
-                new UserResponseDto(1L, "ivan123", "Ivan Ivanov")
-        );
-
+        ProjectResponseDto project = projectService.getProjectById(id);
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 
     @Operation(summary = "Добавление нового Проекта")
     @PostMapping
     public ResponseEntity<ProjectResponseDto> addNewProject(@RequestBody ProjectRequestDto requestDto) {
-        ProjectResponseDto project = convertFromRequestToResponseDto(requestDto);
-
+        ProjectResponseDto project = projectService.addProject(requestDto);
         return new ResponseEntity<>(project, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Изменение Проекта")
     @PutMapping
-    public ResponseEntity<ProjectResponseDto> editProject(@RequestBody ProjectRequestDto requestDto) {
-        ProjectResponseDto project = convertFromRequestToResponseDto(requestDto);
-
+    public ResponseEntity<ProjectResponseDto> updateProject(@RequestBody ProjectRequestDto requestDto) {
+        ProjectResponseDto project = projectService.updateProject(requestDto);
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 
     @Operation(summary = "Удаление конкретного Проекта по его id")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<String> deleteProjectById(@PathVariable Long id) {
-
+        projectService.deleteProject(id);
         return new ResponseEntity<>(
                 String.format("Проект с id #%s был успешно удалён", id),
                 HttpStatus.OK
         );
     }
 
-    private ProjectResponseDto convertFromRequestToResponseDto(ProjectRequestDto requestDto) {
-        return modelMapper.map(requestDto, ProjectResponseDto.class);
-    }
-
     @ExceptionHandler(ProjectNotFoundException.class)
     public ResponseEntity handleNotFoundException(ProjectNotFoundException e) {
-        return new ResponseEntity(HttpStatus.NOT_FOUND);
+        return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
