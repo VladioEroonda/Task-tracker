@@ -12,12 +12,14 @@ public interface ReleaseService {
 
     /**
      * Получение списка всех существующих Релизов
+     *
      * @return List Релизов (обёртку)
      */
     List<ReleaseResponseDto> getAllReleases();
 
     /**
      * Получение конкретного Релиза по его ID
+     *
      * @param id (Long), представляет собой уникальный ID Релиза
      * @return ReleaseResponseDto - объект Релиза (обёртка)
      */
@@ -25,6 +27,7 @@ public interface ReleaseService {
 
     /**
      * Добавление нового Релиза
+     *
      * @param releaseRequestDto (ReleaseRequestDto), представляет собой новый Релиз
      * @return ReleaseRequestDto - объект (обёртка) добавленного Релиза
      */
@@ -32,6 +35,7 @@ public interface ReleaseService {
 
     /**
      * Обновление уже существующего Релиза
+     *
      * @param releaseRequestDto (ReleaseRequestDto), представляет собой обновляемый Релиз
      * @return ReleaseRequestDto - объект (обёртка) обновлённого Релиза
      */
@@ -39,6 +43,7 @@ public interface ReleaseService {
 
     /**
      * Удаление конкретного Релиза по его ID
+     *
      * @param id (Long), представляет собой уникальный ID Релиза
      */
     void deleteRelease(Long id);

@@ -12,12 +12,14 @@ public interface ProjectService {
 
     /**
      * Получение списка всех существующих Проектов
+     *
      * @return List Проектов (обёртку)
      */
     List<ProjectResponseDto> getAllProjects();
 
     /**
      * Получение конкретного Проекта по его ID
+     *
      * @param id (Long), представляет собой уникальный ID Проекта
      * @return ProjectResponseDto - объект Проекта (обёртка)
      */
@@ -25,13 +27,15 @@ public interface ProjectService {
 
     /**
      * Добавление нового Проекта
+     *
      * @param projectRequestDto (ProjectRequestDto), представляет собой новый Проект
      * @return ProjectResponseDto - объект (обёртка) добавленного Проекта
      */
     ProjectResponseDto addProject(ProjectRequestDto projectRequestDto);
 
     /**
-     * Обновление уже существующего Проекта
+     * Обновление уже существующего Проекта. P.s. Данный метод не позволяет закрыть Проект.
+     *
      * @param projectRequestDto (ProjectRequestDto), представляет собой обновляемый Проект
      * @return ProjectResponseDto - объект (обёртка) обновлённого Проекта
      */
@@ -39,6 +43,7 @@ public interface ProjectService {
 
     /**
      * Удаление конкретного Проекта по его ID
+     *
      * @param id (Long), представляет собой уникальный ID Проекта
      */
     void deleteProject(Long id);

@@ -64,7 +64,7 @@ public class UserController {
     public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
         userService.deleteUser(id);
         return new ResponseEntity<>(
-                String.format("Пользователь с id #%s был успешно удалён", id),
+                String.format("Пользователь с id #%d был успешно удалён", id),
                 HttpStatus.OK
         );
     }

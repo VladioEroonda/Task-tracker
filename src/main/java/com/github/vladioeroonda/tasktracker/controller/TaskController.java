@@ -6,7 +6,6 @@ import com.github.vladioeroonda.tasktracker.exception.TaskNotFoundException;
 import com.github.vladioeroonda.tasktracker.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,11 +24,9 @@ import java.util.List;
 @RequestMapping("/api/tracker/task")
 public class TaskController {
 
-    private final ModelMapper modelMapper;
     private final TaskService taskService;
 
-    public TaskController(ModelMapper modelMapper, TaskService taskService) {
-        this.modelMapper = modelMapper;
+    public TaskController(TaskService taskService) {
         this.taskService = taskService;
     }
 
@@ -55,19 +51,12 @@ public class TaskController {
         return new ResponseEntity<>(task, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Изменение Задачи")
-    @PutMapping
-    public ResponseEntity<TaskResponseDto> updateTask(@RequestBody TaskRequestDto requestDto) {
-        TaskResponseDto task = taskService.updateTask(requestDto);
-        return new ResponseEntity<>(task, HttpStatus.OK);
-    }
-
     @Operation(summary = "Удаление конкретной Задачи по её id")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<String> deleteTaskById(@PathVariable Long id) {
         taskService.deleteTask(id);
         return new ResponseEntity<>(
-                String.format("Задача с id #%s была успешно удалена", id),
+                String.format("Задача с id #%d была успешно удалена", id),
                 HttpStatus.OK
         );
     }

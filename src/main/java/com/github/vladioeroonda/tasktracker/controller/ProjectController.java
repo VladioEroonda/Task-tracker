@@ -64,7 +64,7 @@ public class ProjectController {
     public ResponseEntity<String> deleteProjectById(@PathVariable Long id) {
         projectService.deleteProject(id);
         return new ResponseEntity<>(
-                String.format("Проект с id #%s был успешно удалён", id),
+                String.format("Проект с id #%d был успешно удалён", id),
                 HttpStatus.OK
         );
     }

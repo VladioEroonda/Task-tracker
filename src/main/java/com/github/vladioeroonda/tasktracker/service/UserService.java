@@ -12,12 +12,14 @@ public interface UserService {
 
     /**
      * Получение списка всех существующих Пользователей
+     *
      * @return List Пользователей (обёртку)
      */
     List<UserResponseDto> getAllUsers();
 
     /**
      * Получение конкретного Пользователя по его ID
+     *
      * @param id (Long), представляет собой уникальный ID Пользователя
      * @return UserResponseDto - объект Пользователя (обёртка)
      */
@@ -25,6 +27,7 @@ public interface UserService {
 
     /**
      * Добавление нового Пользователя
+     *
      * @param userRequestDto (UserRequestDto), представляет собой нового Пользователя
      * @return UserRequestDto - объект (обёртка) добавленного Пользователя
      */
@@ -32,6 +35,7 @@ public interface UserService {
 
     /**
      * Обновление уже существующего Пользователя
+     *
      * @param userRequestDto (UserRequestDto), представляет собой обновляемого Пользователя
      * @return UserRequestDto - объект (обёртка) обновлённого Пользователя
      */
@@ -39,6 +43,7 @@ public interface UserService {
 
     /**
      * Удаление конкретного Пользователя по его ID
+     *
      * @param id (Long), представляет собой уникальный ID Пользователя
      */
     void deleteUser(Long id);

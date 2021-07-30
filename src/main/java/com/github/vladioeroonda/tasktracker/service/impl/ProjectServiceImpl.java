@@ -21,17 +21,17 @@ import java.util.stream.Collectors;
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
-    private final ModelMapper modelMapper;
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
     public ProjectServiceImpl(
             ProjectRepository projectRepository,
-            ModelMapper modelMapper,
-            UserRepository userRepository
+            UserRepository userRepository,
+            ModelMapper modelMapper
     ) {
         this.projectRepository = projectRepository;
-        this.modelMapper = modelMapper;
         this.userRepository = userRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Transactional
@@ -50,7 +50,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectRepository
                 .findById(id)
                 .orElseThrow(
-                        () -> new ProjectNotFoundException(String.format("Проект с id #%s не существует", id))
+                        () -> new ProjectNotFoundException(String.format("Проект с id #%d не существует", id))
                 );
 
         return convertFromEntityToResponse(project);
@@ -67,7 +67,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .findById(projectRequestDto.getCustomer().getId())
                 .orElseThrow(
                         () -> new UserNotFoundException(
-                                String.format("Пользователь с id #%s не существует", projectRequestDto.getCustomer().getId())
+                                String.format("Пользователь с id #%d не существует", projectRequestDto.getCustomer().getId())
                         )
                 );
 
@@ -85,7 +85,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .findById(projectRequestDto.getId())
                 .orElseThrow(
                         () -> new ProjectNotFoundException(
-                                String.format("Проект с id #%s не существует", projectRequestDto.getId()))
+                                String.format("Проект с id #%d не существует", projectRequestDto.getId()))
                 );
 
         Project projectForSave = convertFromRequestToEntity(projectRequestDto);
@@ -95,7 +95,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .findById(projectRequestDto.getCustomer().getId())
                 .orElseThrow(
                         () -> new UserNotFoundException(
-                                String.format("Пользователь с id #%s не существует", projectRequestDto.getCustomer().getId())
+                                String.format("Пользователь с id #%d не существует", projectRequestDto.getCustomer().getId())
                         )
                 );
 
@@ -112,7 +112,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .findById(id)
                 .orElseThrow(
                         () -> new ProjectNotFoundException(
-                                String.format("Проект с id #%s не существует. Удаление невозможно", id)
+                                String.format("Проект с id #%d не существует. Удаление невозможно", id)
                         )
                 );
         projectRepository.delete(project);

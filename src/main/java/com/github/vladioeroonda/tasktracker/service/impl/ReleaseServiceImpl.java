@@ -41,7 +41,7 @@ public class ReleaseServiceImpl implements ReleaseService {
         Release release = releaseRepository
                 .findById(id)
                 .orElseThrow(
-                        () -> new ReleaseNotFoundException(String.format("Релиз с id #%s не существует", id))
+                        () -> new ReleaseNotFoundException(String.format("Релиз с id #%d не существует", id))
                 );
 
         return convertFromEntityToResponse(release);
@@ -65,7 +65,7 @@ public class ReleaseServiceImpl implements ReleaseService {
                 .findById(releaseRequestDto.getId())
                 .orElseThrow(
                         () -> new ReleaseNotFoundException(
-                                String.format("Релиз с id #%s не существует", releaseRequestDto.getId())
+                                String.format("Релиз с id #%d не существует", releaseRequestDto.getId())
                         )
                 );
 
@@ -84,7 +84,7 @@ public class ReleaseServiceImpl implements ReleaseService {
                 .findById(id)
                 .orElseThrow(
                         () -> new ReleaseNotFoundException(
-                                String.format("Релиз с id #%s не существует. Удаление невозможно", id)
+                                String.format("Релиз с id #%d не существует. Удаление невозможно", id)
                         )
                 );
 

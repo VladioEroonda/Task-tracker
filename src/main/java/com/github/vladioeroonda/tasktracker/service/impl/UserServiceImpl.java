@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository
                 .findById(id)
                 .orElseThrow(
-                        () -> new UserNotFoundException(String.format("Пользователь с id #%s не существует", id))
+                        () -> new UserNotFoundException(String.format("Пользователь с id #%d не существует", id))
                 );
 
         return convertFromEntityToResponse(user);
@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
                 .findById(userRequestDto.getId())
                 .orElseThrow(
                         () -> new UserNotFoundException(
-                                String.format("Пользователь с id #%s не существует", userRequestDto.getId())
+                                String.format("Пользователь с id #%d не существует", userRequestDto.getId())
                         )
                 );
         User userForSave = convertFromRequestToEntity(userRequestDto);
@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
                 .findById(id)
                 .orElseThrow(
                         () -> new UserNotFoundException(
-                                String.format("Пользователь с id #%s не существует. Удаление невозможно", id)
+                                String.format("Пользователь с id #%d не существует. Удаление невозможно", id)
                         )
                 );
 
