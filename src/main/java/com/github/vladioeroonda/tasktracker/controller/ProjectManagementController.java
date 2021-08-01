@@ -27,10 +27,9 @@ public class ProjectManagementController {
     @PutMapping
     public ResponseEntity<ProjectResponseDto> closeProject(
             @RequestBody ProjectStatusChangingRequestDto projectStatusChangingRequestDto
-            ) {
+    ) {
 
         ProjectResponseDto project = projectManagementService.closeProject(projectStatusChangingRequestDto);
-
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 }

@@ -7,6 +7,8 @@ import com.github.vladioeroonda.tasktracker.model.Release;
 import com.github.vladioeroonda.tasktracker.repository.ReleaseRepository;
 import com.github.vladioeroonda.tasktracker.service.ReleaseService;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReleaseServiceImpl implements ReleaseService {
+    private static final Logger logger = LoggerFactory.getLogger(ReleaseServiceImpl.class);
 
     private final ReleaseRepository releaseRepository;
     private final ModelMapper modelMapper;
@@ -28,6 +31,8 @@ public class ReleaseServiceImpl implements ReleaseService {
     @Transactional
     @Override
     public List<ReleaseResponseDto> getAllReleases() {
+        logger.info("Получение списка всех Релизов");
+
         List<Release> releases = releaseRepository.findAll();
         return releases.stream()
                 .map(entity -> convertFromEntityToResponse(entity))
@@ -38,11 +43,16 @@ public class ReleaseServiceImpl implements ReleaseService {
     @Transactional
     @Override
     public ReleaseResponseDto getReleaseById(Long id) {
+        logger.info(String.format("Получение Релиза с id #%d", id));
+
         Release release = releaseRepository
                 .findById(id)
-                .orElseThrow(
-                        () -> new ReleaseNotFoundException(String.format("Релиз с id #%d не существует", id))
-                );
+                .orElseThrow(() -> {
+                    ReleaseNotFoundException exception =
+                            new ReleaseNotFoundException(String.format("Релиз с id #%d не существует", id));
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
 
         return convertFromEntityToResponse(release);
     }
@@ -50,6 +60,8 @@ public class ReleaseServiceImpl implements ReleaseService {
     @Transactional
     @Override
     public ReleaseResponseDto addRelease(ReleaseRequestDto releaseRequestDto) {
+        logger.info("Добавление нового Релиза");
+
         Release releaseForSave = convertFromRequestToEntity(releaseRequestDto);
         releaseForSave.setId(null);
         releaseForSave.setStartTime(LocalDateTime.now());
@@ -61,13 +73,18 @@ public class ReleaseServiceImpl implements ReleaseService {
     @Transactional
     @Override
     public ReleaseResponseDto updateRelease(ReleaseRequestDto releaseRequestDto) {
+        logger.info(String.format("Обновление Релиза с id #%d", releaseRequestDto.getId()));
+
         Release releaseFromBD = releaseRepository
                 .findById(releaseRequestDto.getId())
-                .orElseThrow(
-                        () -> new ReleaseNotFoundException(
-                                String.format("Релиз с id #%d не существует", releaseRequestDto.getId())
-                        )
-                );
+                .orElseThrow(() -> {
+                    ReleaseNotFoundException exception =
+                            new ReleaseNotFoundException(
+                                    String.format("Релиз с id #%d не существует. Обновление невозможно", releaseRequestDto.getId())
+                            );
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
 
         Release releaseForSave = convertFromRequestToEntity(releaseRequestDto);
         releaseForSave.setTasks(releaseFromBD.getTasks());
@@ -80,13 +97,16 @@ public class ReleaseServiceImpl implements ReleaseService {
     @Transactional
     @Override
     public void deleteRelease(Long id) {
+        logger.info(String.format("Удаление Релиза с id #%d", id));
+
         Release release = releaseRepository
                 .findById(id)
-                .orElseThrow(
-                        () -> new ReleaseNotFoundException(
-                                String.format("Релиз с id #%d не существует. Удаление невозможно", id)
-                        )
-                );
+                .orElseThrow(() -> {
+                    ReleaseNotFoundException exception =
+                            new ReleaseNotFoundException(String.format("Релиз с id #%d не существует. Удаление невозможно", id));
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
 
         releaseRepository.delete(release);
     }

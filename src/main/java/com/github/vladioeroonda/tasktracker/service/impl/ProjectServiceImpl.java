@@ -11,6 +11,8 @@ import com.github.vladioeroonda.tasktracker.repository.ProjectRepository;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.ProjectService;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
+    private static final Logger logger = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
@@ -37,6 +40,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public List<ProjectResponseDto> getAllProjects() {
+        logger.info("Получение списка всех Проектов");
+
         List<Project> projects = projectRepository.findAll();
         return projects.stream()
                 .map(entity -> convertFromEntityToResponse(entity))
@@ -47,11 +52,16 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public ProjectResponseDto getProjectById(Long id) {
+        logger.info(String.format("Получение Проекта с id #%d", id));
+
         Project project = projectRepository
                 .findById(id)
-                .orElseThrow(
-                        () -> new ProjectNotFoundException(String.format("Проект с id #%d не существует", id))
-                );
+                .orElseThrow(() -> {
+                    ProjectNotFoundException exception =
+                            new ProjectNotFoundException(String.format("Проект с id #%d не существует", id));
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
 
         return convertFromEntityToResponse(project);
     }
@@ -59,17 +69,25 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public ProjectResponseDto addProject(ProjectRequestDto projectRequestDto) {
+        logger.info("Добавление нового Проекта");
+
         Project projectForSave = convertFromRequestToEntity(projectRequestDto);
         projectForSave.setId(null);
         projectForSave.setStatus(ProjectStatus.IN_PROGRESS);
 
         User customer = userRepository
                 .findById(projectRequestDto.getCustomer().getId())
-                .orElseThrow(
-                        () -> new UserNotFoundException(
-                                String.format("Пользователь с id #%d не существует", projectRequestDto.getCustomer().getId())
-                        )
-                );
+                .orElseThrow(() -> {
+                    UserNotFoundException exception =
+                            new UserNotFoundException(
+                                    String.format(
+                                            "Пользователь с id #%d не существует. Невозможно добавить Проект.",
+                                            projectRequestDto.getCustomer().getId()
+                                    )
+                            );
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
 
         projectForSave.setCustomer(customer);
 
@@ -80,24 +98,35 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public ProjectResponseDto updateProject(ProjectRequestDto projectRequestDto) {
+        logger.info(String.format("Обновление Проекта с id #%d", projectRequestDto.getId()));
 
         Project projectFromBD = projectRepository
                 .findById(projectRequestDto.getId())
-                .orElseThrow(
-                        () -> new ProjectNotFoundException(
-                                String.format("Проект с id #%d не существует", projectRequestDto.getId()))
-                );
+                .orElseThrow(() -> {
+                    ProjectNotFoundException exception =
+                            new ProjectNotFoundException(
+                                    String.format("Проект с id #%d не существует. Обновление невозможно", projectRequestDto.getId())
+                            );
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
 
         Project projectForSave = convertFromRequestToEntity(projectRequestDto);
         projectForSave.setTasks(projectFromBD.getTasks());
 
         User customer = userRepository
                 .findById(projectRequestDto.getCustomer().getId())
-                .orElseThrow(
-                        () -> new UserNotFoundException(
-                                String.format("Пользователь с id #%d не существует", projectRequestDto.getCustomer().getId())
-                        )
-                );
+                .orElseThrow(() -> {
+                    UserNotFoundException exception =
+                            new UserNotFoundException(
+                                    String.format(
+                                            "Пользователь с id #%d не существует. Обновление Проекта невозможно",
+                                            projectRequestDto.getCustomer().getId()
+                                    )
+                            );
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
 
         projectForSave.setCustomer(customer);
 
@@ -108,13 +137,16 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public void deleteProject(Long id) {
+        logger.info(String.format("Удаление Проекта с id #%d", id));
+
         Project project = projectRepository
                 .findById(id)
-                .orElseThrow(
-                        () -> new ProjectNotFoundException(
-                                String.format("Проект с id #%d не существует. Удаление невозможно", id)
-                        )
-                );
+                .orElseThrow(() -> {
+                    ProjectNotFoundException exception =
+                            new ProjectNotFoundException(String.format("Проект с id #%d не существует. Удаление невозможно", id));
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
         projectRepository.delete(project);
     }
 

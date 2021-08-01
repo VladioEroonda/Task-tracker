@@ -2,14 +2,12 @@ package com.github.vladioeroonda.tasktracker.controller;
 
 import com.github.vladioeroonda.tasktracker.dto.request.UserRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.UserResponseDto;
-import com.github.vladioeroonda.tasktracker.exception.UserNotFoundException;
 import com.github.vladioeroonda.tasktracker.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -67,10 +65,5 @@ public class UserController {
                 String.format("Пользователь с id #%d был успешно удалён", id),
                 HttpStatus.OK
         );
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity handleNotFoundException(UserNotFoundException e) {
-        return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }

@@ -8,6 +8,7 @@ import com.github.vladioeroonda.tasktracker.exception.TaskBadDataException;
 import com.github.vladioeroonda.tasktracker.exception.TaskNotFoundException;
 import com.github.vladioeroonda.tasktracker.exception.UserNotFoundException;
 import com.github.vladioeroonda.tasktracker.model.Project;
+import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
 import com.github.vladioeroonda.tasktracker.model.Release;
 import com.github.vladioeroonda.tasktracker.model.Task;
 import com.github.vladioeroonda.tasktracker.model.TaskStatus;
@@ -18,6 +19,8 @@ import com.github.vladioeroonda.tasktracker.repository.TaskRepository;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.TaskService;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class TaskServiceImpl implements TaskService {
-
+    private static final Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);
     private static final int TASK_NAME_MIN_LENGTH = 5;
     private static final int TASK_DESCRIPTION_MIN_LENGTH = 20;
 
@@ -53,6 +56,8 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     @Override
     public List<TaskResponseDto> getAllTasks() {
+        logger.info("Получение списка Задач");
+
         List<Task> tasks = taskRepository.findAll();
         return tasks.stream()
                 .map(entity -> convertFromEntityToResponse(entity))
@@ -63,11 +68,16 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     @Override
     public TaskResponseDto getTaskById(Long id) {
+        logger.info(String.format("Получение Задачи с id #%d", id));
+
         Task task = taskRepository
                 .findById(id)
-                .orElseThrow(
-                        () -> new TaskNotFoundException(String.format("Задача с id #%s не существует", id))
-                );
+                .orElseThrow(() -> {
+                    TaskNotFoundException exception =
+                            new TaskNotFoundException(String.format("Задача с id #%s не существует", id));
+                    logger.debug(exception.getMessage(), exception);
+                    return exception;
+                });
 
         return convertFromEntityToResponse(task);
     }
@@ -75,53 +85,84 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     @Override
     public TaskResponseDto addTask(TaskRequestDto taskRequestDto) {
+        logger.info("Добавление Задачи");
+
         Task taskForSave = convertFromRequestToEntity(taskRequestDto);
         taskForSave.setId(null);
         taskForSave.setStatus(TaskStatus.BACKLOG);
 
         if (taskRequestDto.getName().length() < TASK_NAME_MIN_LENGTH) {
-            throw new TaskBadDataException(
-                    String.format("Слишком короткое имя задачи. Должно быть длиннее %d символов", TASK_NAME_MIN_LENGTH)
-            );
+            TaskBadDataException exception =
+                    new TaskBadDataException(String.format("Слишком короткое имя задачи. Должно быть длиннее %d символов", TASK_NAME_MIN_LENGTH));
+            logger.error(exception.getMessage(), exception);
+            throw exception;
         }
 
         if (taskRequestDto.getDescription().length() < TASK_DESCRIPTION_MIN_LENGTH) {
-            throw new TaskBadDataException(
-                    String.format("Слишком короткое описание задачи. Должно быть длиннее %d символов", TASK_DESCRIPTION_MIN_LENGTH)
-            );
+            TaskBadDataException exception =
+                    new TaskBadDataException(
+                            String.format("Слишком короткое описание задачи. Должно быть длиннее %d символов", TASK_DESCRIPTION_MIN_LENGTH)
+                    );
+            logger.error(exception.getMessage(), exception);
+            throw exception;
         }
 
         Project project = projectRepository.findById(taskRequestDto.getProject().getId())
-                .orElseThrow(
-                        () -> new ProjectNotFoundException(
-                                String.format("Проект с id #%d не существует", taskRequestDto.getProject().getId()))
-                );
+                .orElseThrow(() -> {
+                    ProjectNotFoundException exception =
+                            new ProjectNotFoundException(
+                                    String.format("Проект с id #%d не существует. Невозможно добавить Задачу", taskRequestDto.getProject().getId())
+                            );
+                    logger.error(exception.getMessage(), exception);
+                    throw exception;
+                });
+
+        if (project.getStatus() == ProjectStatus.FINISHED) {
+            TaskBadDataException exception =
+                    new TaskBadDataException("Вы пытаетесь добавить задачу в уже закрытый проект");
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
         taskForSave.setProject(project);
 
         Release release = releaseRepository
                 .findById(taskRequestDto.getRelease().getId())
-                .orElseThrow(
-                        () -> new ReleaseNotFoundException(
-                                String.format("Релиз с id #%d не существует", taskRequestDto.getRelease().getId()))
-                );
+                .orElseThrow(() -> {
+                    ReleaseNotFoundException exception =
+                            new ReleaseNotFoundException(
+                                    String.format("Релиз с id #%d не существует. Невозможно добавить Задачу", taskRequestDto.getRelease().getId())
+                            );
+                    logger.error(exception.getMessage(), exception);
+                    throw exception;
+                });
         taskForSave.setRelease(release);
 
         User author = userRepository
                 .findById(taskRequestDto.getAuthor().getId())
-                .orElseThrow(
-                        () -> new UserNotFoundException(
-                                String.format("Автор с id #%d не существует", taskRequestDto.getAuthor().getId()))
-                );
+                .orElseThrow(() -> {
+                    UserNotFoundException exception =
+                            new UserNotFoundException(
+                                    String.format("Автор с id #%d не существует. Невозможно добавить Задачу", taskRequestDto.getAuthor().getId())
+                            );
+                    logger.error(exception.getMessage(), exception);
+                    throw exception;
+                });
         taskForSave.setAuthor(author);
 
         if (taskRequestDto.getExecutor() != null) {
             User executor = userRepository
                     .findById(taskRequestDto.getExecutor().getId())
-                    .orElseThrow(
-                            () -> new UserNotFoundException(
-                                    String.format("Исполнитель с id #%d не существует", taskRequestDto.getExecutor().getId()))
-                    );
-
+                    .orElseThrow(() -> {
+                        UserNotFoundException exception =
+                                new UserNotFoundException(
+                                        String.format(
+                                                "Исполнитель с id #%d не существует. Невозможно добавить Задачу",
+                                                taskRequestDto.getExecutor().getId()
+                                        )
+                                );
+                        logger.error(exception.getMessage(), exception);
+                        throw exception;
+                    });
             taskForSave.setExecutor(executor);
         }
 
@@ -132,11 +173,16 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     @Override
     public void deleteTask(Long id) {
+        logger.info(String.format("Удаление Задачи с id #%d", id));
+
         Task task = taskRepository
                 .findById(id)
-                .orElseThrow(
-                        () -> new TaskNotFoundException(String.format("Задача с id #%d не существует", id))
-                );
+                .orElseThrow(() -> {
+                    TaskNotFoundException exception =
+                            new TaskNotFoundException(String.format("Задача с id #%d не существует. Удаление невозможно", id));
+                    logger.error(exception.getMessage(), exception);
+                    throw exception;
+                });
 
         taskRepository.delete(task);
     }

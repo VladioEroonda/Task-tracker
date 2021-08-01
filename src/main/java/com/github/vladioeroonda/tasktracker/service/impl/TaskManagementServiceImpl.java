@@ -15,11 +15,14 @@ import com.github.vladioeroonda.tasktracker.repository.TaskRepository;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.TaskManagementService;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TaskManagementServiceImpl implements TaskManagementService {
+    private static final Logger logger = LoggerFactory.getLogger(TaskManagementServiceImpl.class);
 
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
@@ -44,13 +47,17 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     @Transactional
     @Override
     public TaskResponseDto changeTaskStatus(TaskRequestDto taskRequestDto) {
+        logger.info("Выполнение Задачи (изменение полей)");
 
         fieldsCheckForExisting(taskRequestDto);
 
         if (!taskRequestDto.getStatus().equals(TaskStatus.BACKLOG) && taskRequestDto.getExecutor() == null) {
-            throw new TaskBadDataException(
-                    String.format("Задаче id #%d не назначен Исполнитель", taskRequestDto.getId())
-            );
+            TaskBadDataException exception =
+                    new TaskBadDataException(String.format(
+                            "Задаче id #%d со статусом отличным от %s не назначен Исполнитель", taskRequestDto.getId(), TaskStatus.BACKLOG)
+                    );
+            logger.error(exception.getMessage(), exception);
+            throw exception;
         }
 
         Task taskForSave = convertFromRequestToEntity(taskRequestDto);
@@ -61,39 +68,58 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     private void fieldsCheckForExisting(TaskRequestDto taskRequestDto) {
         taskRepository
                 .findById(taskRequestDto.getId())
-                .orElseThrow(
-                        () -> new TaskNotFoundException(
-                                String.format("Задача с id #%d не существует", taskRequestDto.getId())
-                        )
-                );
+                .orElseThrow(() -> {
+                    TaskNotFoundException exception =
+                            new TaskNotFoundException(String.format("Задача с id #%d не существует. Изменение невозможно", taskRequestDto.getId()));
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
 
         projectRepository.findById(taskRequestDto.getProject().getId())
-                .orElseThrow(
-                        () -> new ProjectNotFoundException(
-                                String.format("Проект с id #%d не существует", taskRequestDto.getProject().getId()))
-                );
+                .orElseThrow(() -> {
+                    ProjectNotFoundException exception =
+                            new ProjectNotFoundException(
+                                    String.format("Проект с id #%d не существует. Изменение Задачи невозможно", taskRequestDto.getProject().getId()));
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
 
         releaseRepository
                 .findById(taskRequestDto.getRelease().getId())
-                .orElseThrow(
-                        () -> new ReleaseNotFoundException(
-                                String.format("Релиз с id #%d не существует", taskRequestDto.getRelease().getId()))
-                );
+                .orElseThrow(() -> {
+                    ReleaseNotFoundException exception =
+                            new ReleaseNotFoundException(
+                                    String.format("Релиз с id #%d не существует. Изменение Задачи невозможно", taskRequestDto.getRelease().getId())
+                            );
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
 
         userRepository
                 .findById(taskRequestDto.getAuthor().getId())
-                .orElseThrow(
-                        () -> new UserNotFoundException(
-                                String.format("Автор с id #%d не существует", taskRequestDto.getAuthor().getId()))
-                );
+                .orElseThrow(() -> {
+                    UserNotFoundException exception =
+                            new UserNotFoundException(
+                                    String.format("Автор с id #%d не существует. Изменение Задачи невозможно", taskRequestDto.getAuthor().getId())
+                            );
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
 
         if (taskRequestDto.getExecutor() != null) {
             userRepository
                     .findById(taskRequestDto.getExecutor().getId())
-                    .orElseThrow(
-                            () -> new UserNotFoundException(
-                                    String.format("Исполнитель с id #%d не существует", taskRequestDto.getExecutor().getId()))
-                    );
+                    .orElseThrow(() -> {
+                        UserNotFoundException exception =
+                                new UserNotFoundException(
+                                        String.format(
+                                                "Исполнитель с id #%d не существует. Изменение Задачи невозможно",
+                                                taskRequestDto.getExecutor().getId()
+                                        )
+                                );
+                        logger.error(exception.getMessage(), exception);
+                        return exception;
+                    });
         }
     }
 
