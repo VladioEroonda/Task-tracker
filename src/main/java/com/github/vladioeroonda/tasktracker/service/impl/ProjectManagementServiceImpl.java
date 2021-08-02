@@ -1,14 +1,16 @@
 package com.github.vladioeroonda.tasktracker.service.impl;
 
-import com.github.vladioeroonda.tasktracker.dto.request.ProjectStatusChangingRequestDto;
+import com.github.vladioeroonda.tasktracker.dto.request.ProjectClosingRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ProjectResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.ProjectClosingException;
 import com.github.vladioeroonda.tasktracker.exception.ProjectNotFoundException;
 import com.github.vladioeroonda.tasktracker.model.Project;
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
-import com.github.vladioeroonda.tasktracker.model.Task;
+import com.github.vladioeroonda.tasktracker.model.Release;
 import com.github.vladioeroonda.tasktracker.repository.ProjectRepository;
 import com.github.vladioeroonda.tasktracker.service.ProjectManagementService;
+import com.github.vladioeroonda.tasktracker.service.ReleaseService;
+import com.github.vladioeroonda.tasktracker.service.TaskService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,16 +25,25 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
     private static final Logger logger = LoggerFactory.getLogger(ProjectManagementServiceImpl.class);
 
     private final ProjectRepository projectRepository;
+    private final TaskService taskService;
+    private final ReleaseService releaseService;
     private final ModelMapper modelMapper;
 
-    public ProjectManagementServiceImpl(ProjectRepository projectRepository, ModelMapper modelMapper) {
+    public ProjectManagementServiceImpl(
+            ProjectRepository projectRepository,
+            TaskService taskService,
+            ReleaseService releaseService,
+            ModelMapper modelMapper
+    ) {
         this.projectRepository = projectRepository;
+        this.taskService = taskService;
+        this.releaseService = releaseService;
         this.modelMapper = modelMapper;
     }
 
     @Transactional
     @Override
-    public ProjectResponseDto closeProject(ProjectStatusChangingRequestDto projectRequestDto) {
+    public ProjectResponseDto closeProject(ProjectClosingRequestDto projectRequestDto) {
         logger.info("Закрытие проекта");
 
         if (projectRequestDto.getProjectStatus() != ProjectStatus.FINISHED) {
@@ -56,17 +67,36 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
             throw exception;
         }
 
-        List<Task> projectTasks =
-                projectRepository.getAllNotClosedTasksByProjectId(projectFromBD.getId()) == null ?
-                        new ArrayList<>() : projectRepository.getAllNotClosedTasksByProjectId(projectFromBD.getId());
 
-        if (projectTasks.size() > 0) {
+
+        List<Release> notClosedReleases =
+                releaseService.getAllNotClosedReleasesByProjectId(projectRequestDto.getId()) == null ?
+                        new ArrayList<>() : releaseService.getAllNotClosedReleasesByProjectId(projectRequestDto.getId());
+
+        System.out.println("OPA" + notClosedReleases);
+
+        if (notClosedReleases.size() > 0) {
             ProjectClosingException exception = new ProjectClosingException(
                     String.format(
-                            "Вы пытаетесь закрыть проект, в котором остались не закрытые задачи (%d)",
-                            projectTasks.size()
+                            "Вы пытаетесь закрыть проект, в котором остались незакрытые релизы (%d)",
+                            notClosedReleases.size()
                     ));
-            logger.error(exception.getMessage(),exception);
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
+
+        int unfinishedTasks = taskService.countUnfinishedTasksByReleaseId(projectFromBD.getId());
+
+        logger.debug("unfinishedTasks: ",unfinishedTasks);
+        System.out.println(unfinishedTasks);
+
+        if (unfinishedTasks > 0) {
+            ProjectClosingException exception = new ProjectClosingException(
+                    String.format(
+                            "Вы пытаетесь закрыть проект, в котором остались незакрытые задачи (%d)",
+                            unfinishedTasks
+                    ));
+            logger.error(exception.getMessage(), exception);
             throw exception;
         }
 

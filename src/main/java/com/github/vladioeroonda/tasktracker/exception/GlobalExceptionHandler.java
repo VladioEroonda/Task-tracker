@@ -19,13 +19,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(value = {TaskBadDataException.class, UserBadDataException.class})
+    @ExceptionHandler(value = {
+            TaskBadDataException.class,
+            UserBadDataException.class,
+            ReleaseBadDataException.class,
+            ProjectBadDataException.class
+    })
     public ResponseEntity<Object> handleBadDataException(RuntimeException e) {
         ExceptionTemplate exceptionResponse = new ExceptionTemplate(e.getMessage(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ProjectClosingException.class)
+    @ExceptionHandler(value = {ProjectClosingException.class, ReleaseClosingException.class})
     public ResponseEntity<Object> handleClosingException(RuntimeException e) {
         ExceptionTemplate exceptionResponse = new ExceptionTemplate(e.getMessage(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);

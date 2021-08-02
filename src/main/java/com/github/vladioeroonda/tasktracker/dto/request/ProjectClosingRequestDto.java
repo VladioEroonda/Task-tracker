@@ -3,17 +3,17 @@ package com.github.vladioeroonda.tasktracker.dto.request;
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Dto для изменения статуса проекта(запрос)")
-public class ProjectStatusChangingRequestDto {
+@Schema(description = "Dto для закрытия Проекта(запрос)")
+public class ProjectClosingRequestDto {
     @Schema(description = "Id Проекта")
     private Long id;
     @Schema(description = "Статус Проекта")
     private ProjectStatus projectStatus;
 
-    public ProjectStatusChangingRequestDto() {
+    public ProjectClosingRequestDto() {
     }
 
-    public ProjectStatusChangingRequestDto(Long id, ProjectStatus projectStatus) {
+    public ProjectClosingRequestDto(Long id, ProjectStatus projectStatus) {
         this.id = id;
         this.projectStatus = projectStatus;
     }

@@ -43,7 +43,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
     @Transactional
     @Override
-    public TaskResponseDto changeTaskStatus(TaskRequestDto taskRequestDto) {
+    public TaskResponseDto closeTask(TaskRequestDto taskRequestDto) {
         logger.info("Выполнение Задачи (изменение полей)");
 
         fieldsCheckForExisting(taskRequestDto);
@@ -65,8 +65,8 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     private void fieldsCheckForExisting(TaskRequestDto taskRequestDto) {
 
         taskRepository.existsById(taskRequestDto.getId());
-        projectService.checkProjectExistsById(taskRequestDto.getId());
-        releaseService.checkReleaseExistsById(taskRequestDto.getId());
+        projectService.checkProjectExistsById(taskRequestDto.getProject().getId());
+        releaseService.checkReleaseExistsById(taskRequestDto.getRelease().getId());
         userService.checkUserExistsById(taskRequestDto.getAuthor().getId());
 
         if (taskRequestDto.getExecutor() != null) {

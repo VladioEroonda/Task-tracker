@@ -2,6 +2,7 @@ package com.github.vladioeroonda.tasktracker.service.impl;
 
 import com.github.vladioeroonda.tasktracker.dto.request.ReleaseRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ReleaseResponseDto;
+import com.github.vladioeroonda.tasktracker.exception.ReleaseBadDataException;
 import com.github.vladioeroonda.tasktracker.exception.ReleaseNotFoundException;
 import com.github.vladioeroonda.tasktracker.model.Release;
 import com.github.vladioeroonda.tasktracker.repository.ReleaseRepository;
@@ -89,6 +90,7 @@ public class ReleaseServiceImpl implements ReleaseService {
         Release releaseForSave = convertFromRequestToEntity(releaseRequestDto);
         releaseForSave.setId(null);
         releaseForSave.setStartTime(LocalDateTime.now());
+        releaseForSave.setFinishTime(null);
 
         Release savedRelease = releaseRepository.save(releaseForSave);
         return convertFromEntityToResponse(savedRelease);
@@ -109,6 +111,13 @@ public class ReleaseServiceImpl implements ReleaseService {
                     logger.error(exception.getMessage(), exception);
                     return exception;
                 });
+
+        if(releaseRequestDto.getFinishTime()!=null){
+            ReleaseBadDataException exception =
+                    new ReleaseBadDataException("Закрытие Релиза возможно только через эндпоинт Управления");
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
 
         Release releaseForSave = convertFromRequestToEntity(releaseRequestDto);
         releaseForSave.setTasks(releaseFromBD.getTasks());
@@ -133,6 +142,12 @@ public class ReleaseServiceImpl implements ReleaseService {
                 });
 
         releaseRepository.delete(release);
+    }
+
+    @Transactional
+    @Override
+    public List<Release> getAllNotClosedReleasesByProjectId(Long id){
+        return releaseRepository.getAllNotClosedReleasesByProjectId(id);
     }
 
     private Release convertFromRequestToEntity(ReleaseRequestDto requestDto) {

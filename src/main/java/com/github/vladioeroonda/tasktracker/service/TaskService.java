@@ -55,4 +55,19 @@ public interface TaskService {
      * @param id (Long), представляет собой уникальный ID Задачи
      */
     void deleteTask(Long id);
+
+    /**
+     * Получение числа незакрытых Задач по ID Проекта
+     *
+     * @param id (Long), представляет собой ID Проекта
+     * @return число незакрытых задач
+     */
+    int countUnfinishedTasksByReleaseId(Long id);
+
+    /**
+     * Смена статуса всех задач на Отменён по ID Релиза, к которому они относятся
+     *
+     * @param id (Long), представляет собой ID Релиза
+     */
+    void setAllTasksCancelled(Long id);
 }

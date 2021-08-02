@@ -2,11 +2,8 @@ package com.github.vladioeroonda.tasktracker.service.impl;
 
 import com.github.vladioeroonda.tasktracker.dto.request.TaskRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.TaskResponseDto;
-import com.github.vladioeroonda.tasktracker.exception.ProjectNotFoundException;
-import com.github.vladioeroonda.tasktracker.exception.ReleaseNotFoundException;
 import com.github.vladioeroonda.tasktracker.exception.TaskBadDataException;
 import com.github.vladioeroonda.tasktracker.exception.TaskNotFoundException;
-import com.github.vladioeroonda.tasktracker.exception.UserNotFoundException;
 import com.github.vladioeroonda.tasktracker.model.Project;
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
 import com.github.vladioeroonda.tasktracker.model.Release;
@@ -175,6 +172,18 @@ public class TaskServiceImpl implements TaskService {
                 });
 
         taskRepository.delete(task);
+    }
+
+    @Transactional
+    @Override
+    public int countUnfinishedTasksByReleaseId(Long id) {
+        return taskRepository.countUnfinishedTasksByReleaseId(id);
+    }
+
+    @Transactional
+    @Override
+    public void setAllTasksCancelled(Long id) {
+        taskRepository.setAllTasksCancelled(id);
     }
 
     private Task convertFromRequestToEntity(TaskRequestDto requestDto) {

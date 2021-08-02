@@ -2,6 +2,7 @@ package com.github.vladioeroonda.tasktracker.service.impl;
 
 import com.github.vladioeroonda.tasktracker.dto.request.ProjectRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ProjectResponseDto;
+import com.github.vladioeroonda.tasktracker.exception.ProjectBadDataException;
 import com.github.vladioeroonda.tasktracker.exception.ProjectNotFoundException;
 import com.github.vladioeroonda.tasktracker.model.Project;
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
@@ -98,7 +99,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectForSave.setId(null);
         projectForSave.setStatus(ProjectStatus.IN_PROGRESS);
 
-        User customer = userService.getUserByIdAndReturnEntity(projectRequestDto.getId());
+        User customer = userService.getUserByIdAndReturnEntity(projectRequestDto.getCustomer().getId());
         projectForSave.setCustomer(customer);
 
         Project savedProject = projectRepository.save(projectForSave);
@@ -109,6 +110,13 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponseDto updateProject(ProjectRequestDto projectRequestDto) {
         logger.info(String.format("Обновление Проекта с id #%d", projectRequestDto.getId()));
+
+        if(projectRequestDto.getStatus()==ProjectStatus.FINISHED){
+            ProjectBadDataException exception =
+                    new ProjectBadDataException("Недопустимый статус задачи");
+            logger.error(exception.getMessage(),exception);
+            throw exception;
+        }
 
         Project projectFromBD = projectRepository
                 .findById(projectRequestDto.getId())

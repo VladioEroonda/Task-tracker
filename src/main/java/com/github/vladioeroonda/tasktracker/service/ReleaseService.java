@@ -3,6 +3,7 @@ package com.github.vladioeroonda.tasktracker.service;
 import com.github.vladioeroonda.tasktracker.dto.request.ReleaseRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ReleaseResponseDto;
 import com.github.vladioeroonda.tasktracker.model.Release;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -63,4 +64,11 @@ public interface ReleaseService {
      * @param id (Long), представляет собой уникальный ID Релиза
      */
     void deleteRelease(Long id);
+
+    /**
+     * Получение всех незакрытых Релизов () по ID Проекта
+     *
+     * @param id (Long), представляет собой ID Проекта
+     */
+    List<Release> getAllNotClosedReleasesByProjectId(Long id);
 }

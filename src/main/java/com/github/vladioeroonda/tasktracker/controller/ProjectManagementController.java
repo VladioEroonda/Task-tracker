@@ -1,13 +1,13 @@
 package com.github.vladioeroonda.tasktracker.controller;
 
-import com.github.vladioeroonda.tasktracker.dto.request.ProjectStatusChangingRequestDto;
+import com.github.vladioeroonda.tasktracker.dto.request.ProjectClosingRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ProjectResponseDto;
 import com.github.vladioeroonda.tasktracker.service.ProjectManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,12 +24,9 @@ public class ProjectManagementController {
     }
 
     @Operation(summary = "Завершение Проекта")
-    @PutMapping
-    public ResponseEntity<ProjectResponseDto> closeProject(
-            @RequestBody ProjectStatusChangingRequestDto projectStatusChangingRequestDto
-    ) {
-
-        ProjectResponseDto project = projectManagementService.closeProject(projectStatusChangingRequestDto);
+    @PatchMapping
+    public ResponseEntity<ProjectResponseDto> closeProject(@RequestBody ProjectClosingRequestDto projectClosingRequestDto) {
+        ProjectResponseDto project = projectManagementService.closeProject(projectClosingRequestDto);
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 }

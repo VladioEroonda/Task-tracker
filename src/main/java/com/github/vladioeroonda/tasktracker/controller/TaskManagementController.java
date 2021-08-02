@@ -26,7 +26,7 @@ public class TaskManagementController {
     @Operation(summary = "Изменение Задачи")
     @PutMapping
     public ResponseEntity<TaskResponseDto> updateTask(@RequestBody TaskRequestDto requestDto) {
-        TaskResponseDto task = taskManagementService.changeTaskStatus(requestDto);
+        TaskResponseDto task = taskManagementService.closeTask(requestDto);
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 }

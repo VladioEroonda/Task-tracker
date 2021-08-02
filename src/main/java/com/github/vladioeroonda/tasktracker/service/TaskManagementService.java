@@ -13,5 +13,5 @@ public interface TaskManagementService {
      * @param taskRequestDto (TaskRequestDto), представляет собой обновляемую Задачу
      * @return TaskRequestDto - объект (обёртка) обновлённой Задачи
      */
-    TaskResponseDto changeTaskStatus(TaskRequestDto taskRequestDto);
+    TaskResponseDto closeTask(TaskRequestDto taskRequestDto);
 }
