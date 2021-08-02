@@ -39,7 +39,7 @@ public class ProjectController {
     @Operation(summary = "Получение конкретного Проекта по его id")
     @GetMapping(value = "/{id}")
     public ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable Long id) {
-        ProjectResponseDto project = projectService.getProjectById(id);
+        ProjectResponseDto project = projectService.getProjectByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 

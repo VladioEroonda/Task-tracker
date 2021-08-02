@@ -39,7 +39,7 @@ public class UserController {
     @Operation(summary = "Получение конкретного Пользователя по его id")
     @GetMapping(value = "/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
-        UserResponseDto user = userService.getUserById(id);
+        UserResponseDto user = userService.getUserByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

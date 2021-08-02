@@ -38,7 +38,7 @@ public class TaskController {
     @Operation(summary = "Получение конкретной Задачи по её id")
     @GetMapping(value = "/{id}")
     public ResponseEntity<TaskResponseDto> getTaskById(@PathVariable Long id) {
-        TaskResponseDto task = taskService.getTaskById(id);
+        TaskResponseDto task = taskService.getTaskByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 

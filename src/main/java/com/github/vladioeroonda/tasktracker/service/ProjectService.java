@@ -2,6 +2,7 @@ package com.github.vladioeroonda.tasktracker.service;
 
 import com.github.vladioeroonda.tasktracker.dto.request.ProjectRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ProjectResponseDto;
+import com.github.vladioeroonda.tasktracker.model.Project;
 
 import java.util.List;
 
@@ -18,12 +19,27 @@ public interface ProjectService {
     List<ProjectResponseDto> getAllProjects();
 
     /**
-     * Получение конкретного Проекта по его ID
+     * Получение конкретного Проекта по его ID и возвращение в виде обёртки
      *
      * @param id (Long), представляет собой уникальный ID Проекта
      * @return ProjectResponseDto - объект Проекта (обёртка)
      */
-    ProjectResponseDto getProjectById(Long id);
+    ProjectResponseDto getProjectByIdAndReturnResponseDto(Long id);
+
+    /**
+     * Получение конкретного Проекта по его ID
+     *
+     * @param id (Long), представляет собой уникальный ID Проекта
+     * @return Project - объект Проекта
+     */
+    Project getProjectByIdAndReturnEntity(Long id);
+
+    /**
+     * Проверка на наличие конкретного Проекта по его ID
+     *
+     * @param id (Long), представляет собой уникальный ID Проекта
+     */
+    void checkProjectExistsById(Long id);
 
     /**
      * Добавление нового Проекта

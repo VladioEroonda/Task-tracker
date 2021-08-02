@@ -9,4 +9,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/tracker/release/management")
 public class ReleaseManagementController {
 
+//    @Operation(summary = "Подсчет количества задач, не завершившихся в заданный релиз")
+//    @PostMapping
+//    public ResponseEntity<TaskResponseDto> updateTask(@RequestBody TaskRequestDto requestDto) {
+//        TaskResponseDto task = taskManagementService.changeTaskStatus(requestDto);
+//        return new ResponseEntity<>(task, HttpStatus.OK);
+//    }
+
+    //    @Operation(summary = "закрытие релиза")
+//    @PutMapping
+//    public ResponseEntity<TaskResponseDto> updateTask(@RequestBody TaskRequestDto requestDto) {
+//        TaskResponseDto task = taskManagementService.changeTaskStatus(requestDto);
+//        return new ResponseEntity<>(task, HttpStatus.OK);
+//    }
 }

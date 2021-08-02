@@ -2,6 +2,7 @@ package com.github.vladioeroonda.tasktracker.service;
 
 import com.github.vladioeroonda.tasktracker.dto.request.ReleaseRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ReleaseResponseDto;
+import com.github.vladioeroonda.tasktracker.model.Release;
 
 import java.util.List;
 
@@ -18,12 +19,27 @@ public interface ReleaseService {
     List<ReleaseResponseDto> getAllReleases();
 
     /**
-     * Получение конкретного Релиза по его ID
+     * Получение конкретного Релиза по его ID и возвращение его в виде обёртки
      *
      * @param id (Long), представляет собой уникальный ID Релиза
      * @return ReleaseResponseDto - объект Релиза (обёртка)
      */
-    ReleaseResponseDto getReleaseById(Long id);
+    ReleaseResponseDto getReleaseByIdAndReturnResponseDto(Long id);
+
+    /**
+     * Получение конкретного Релиза по его ID и возвращение его в виде обёртки
+     *
+     * @param id (Long), представляет собой уникальный ID Релиза
+     * @return Release - объект Релиза
+     */
+    Release getReleaseByIdAndReturnEntity(Long id);
+
+    /**
+     * Проверка на наличие конкретного Релиза по его ID
+     *
+     * @param id (Long), представляет собой уникальный ID Релиза
+     */
+    void checkReleaseExistsById(Long id);
 
     /**
      * Добавление нового Релиза

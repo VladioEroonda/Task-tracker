@@ -39,7 +39,7 @@ public class ReleaseController {
     @Operation(summary = "Получение конкретного Релиза по его id")
     @GetMapping(value = "/{id}")
     public ResponseEntity<ReleaseResponseDto> getReleaseById(@PathVariable Long id) {
-        ReleaseResponseDto release = releaseService.getReleaseById(id);
+        ReleaseResponseDto release = releaseService.getReleaseByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(release, HttpStatus.OK);
     }
 

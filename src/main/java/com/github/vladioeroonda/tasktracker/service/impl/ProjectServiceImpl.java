@@ -3,13 +3,12 @@ package com.github.vladioeroonda.tasktracker.service.impl;
 import com.github.vladioeroonda.tasktracker.dto.request.ProjectRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ProjectResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.ProjectNotFoundException;
-import com.github.vladioeroonda.tasktracker.exception.UserNotFoundException;
 import com.github.vladioeroonda.tasktracker.model.Project;
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
 import com.github.vladioeroonda.tasktracker.model.User;
 import com.github.vladioeroonda.tasktracker.repository.ProjectRepository;
-import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.ProjectService;
+import com.github.vladioeroonda.tasktracker.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,16 +23,16 @@ public class ProjectServiceImpl implements ProjectService {
     private static final Logger logger = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
     private final ProjectRepository projectRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ModelMapper modelMapper;
 
     public ProjectServiceImpl(
             ProjectRepository projectRepository,
-            UserRepository userRepository,
+            UserService userService,
             ModelMapper modelMapper
     ) {
         this.projectRepository = projectRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.modelMapper = modelMapper;
     }
 
@@ -51,7 +50,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Transactional
     @Override
-    public ProjectResponseDto getProjectById(Long id) {
+    public ProjectResponseDto getProjectByIdAndReturnResponseDto(Long id) {
         logger.info(String.format("Получение Проекта с id #%d", id));
 
         Project project = projectRepository
@@ -68,6 +67,30 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Transactional
     @Override
+    public Project getProjectByIdAndReturnEntity(Long id) {
+        return projectRepository
+                .findById(id)
+                .orElseThrow(() -> {
+                    ProjectNotFoundException exception =
+                            new ProjectNotFoundException(String.format("Проект с id #%d не существует", id));
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
+    }
+
+    @Transactional
+    @Override
+    public void checkProjectExistsById(Long id) {
+        if(projectRepository.findById(id).isEmpty()){
+            ProjectNotFoundException exception =
+                    new ProjectNotFoundException(String.format("Проект с id #%d не существует", id));
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
+    }
+
+    @Transactional
+    @Override
     public ProjectResponseDto addProject(ProjectRequestDto projectRequestDto) {
         logger.info("Добавление нового Проекта");
 
@@ -75,20 +98,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectForSave.setId(null);
         projectForSave.setStatus(ProjectStatus.IN_PROGRESS);
 
-        User customer = userRepository
-                .findById(projectRequestDto.getCustomer().getId())
-                .orElseThrow(() -> {
-                    UserNotFoundException exception =
-                            new UserNotFoundException(
-                                    String.format(
-                                            "Пользователь с id #%d не существует. Невозможно добавить Проект.",
-                                            projectRequestDto.getCustomer().getId()
-                                    )
-                            );
-                    logger.error(exception.getMessage(), exception);
-                    return exception;
-                });
-
+        User customer = userService.getUserByIdAndReturnEntity(projectRequestDto.getId());
         projectForSave.setCustomer(customer);
 
         Project savedProject = projectRepository.save(projectForSave);
@@ -114,20 +124,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project projectForSave = convertFromRequestToEntity(projectRequestDto);
         projectForSave.setTasks(projectFromBD.getTasks());
 
-        User customer = userRepository
-                .findById(projectRequestDto.getCustomer().getId())
-                .orElseThrow(() -> {
-                    UserNotFoundException exception =
-                            new UserNotFoundException(
-                                    String.format(
-                                            "Пользователь с id #%d не существует. Обновление Проекта невозможно",
-                                            projectRequestDto.getCustomer().getId()
-                                    )
-                            );
-                    logger.error(exception.getMessage(), exception);
-                    return exception;
-                });
-
+        User customer = userService.getUserByIdAndReturnEntity(projectRequestDto.getCustomer().getId());
         projectForSave.setCustomer(customer);
 
         Project updatedProject = projectRepository.save(projectForSave);

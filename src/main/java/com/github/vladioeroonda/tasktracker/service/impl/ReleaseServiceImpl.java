@@ -42,7 +42,7 @@ public class ReleaseServiceImpl implements ReleaseService {
 
     @Transactional
     @Override
-    public ReleaseResponseDto getReleaseById(Long id) {
+    public ReleaseResponseDto getReleaseByIdAndReturnResponseDto(Long id) {
         logger.info(String.format("Получение Релиза с id #%d", id));
 
         Release release = releaseRepository
@@ -55,6 +55,30 @@ public class ReleaseServiceImpl implements ReleaseService {
                 });
 
         return convertFromEntityToResponse(release);
+    }
+
+    @Transactional
+    @Override
+    public Release getReleaseByIdAndReturnEntity(Long id) {
+        return releaseRepository
+                .findById(id)
+                .orElseThrow(() -> {
+                    ReleaseNotFoundException exception =
+                            new ReleaseNotFoundException(String.format("Релиз с id #%d не существует", id));
+                    logger.error(exception.getMessage(), exception);
+                    return exception;
+                });
+    }
+
+    @Transactional
+    @Override
+    public void checkReleaseExistsById(Long id) {
+        if (releaseRepository.findById(id).isEmpty()) {
+            ReleaseNotFoundException exception =
+                    new ReleaseNotFoundException(String.format("Релиз с id #%d не существует", id));
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
     }
 
     @Transactional
