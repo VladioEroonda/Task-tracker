@@ -3,7 +3,7 @@ package com.github.vladioeroonda.tasktracker.controller;
 import com.github.vladioeroonda.tasktracker.dto.request.TaskRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.TaskResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.TaskNotFoundException;
-import com.github.vladioeroonda.tasktracker.model.TaskStatus;
+import com.github.vladioeroonda.tasktracker.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
@@ -27,74 +27,53 @@ import java.util.List;
 public class TaskController {
 
     private final ModelMapper modelMapper;
+    private final TaskService taskService;
 
-    public TaskController(ModelMapper modelMapper) {
+    public TaskController(ModelMapper modelMapper, TaskService taskService) {
         this.modelMapper = modelMapper;
+        this.taskService = taskService;
     }
 
     @Operation(summary = "Получение списка всех Задач")
     @GetMapping
     public ResponseEntity<List<TaskResponseDto>> getAllTasks() {
-        TaskResponseDto task1 = new TaskResponseDto(
-                1L,
-                "Task#1",
-                TaskStatus.IN_PROGRESS
-        );
-        TaskResponseDto task2 = new TaskResponseDto(
-                2L,
-                "Task#2",
-                TaskStatus.BACKLOG
-        );
-
-        List<TaskResponseDto> tasks = List.of(task1, task2);
+        List<TaskResponseDto> tasks = taskService.getAllTasks();
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
     @Operation(summary = "Получение конкретной Задачи по её id")
     @GetMapping(value = "/{id}")
     public ResponseEntity<TaskResponseDto> getTaskById(@PathVariable Long id) {
-
-        TaskResponseDto task = new TaskResponseDto(
-                1L,
-                "Task#1",
-                TaskStatus.IN_PROGRESS
-        );
-
+        TaskResponseDto task = taskService.getTaskById(id);
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 
     @Operation(summary = "Добавление новой Задачи")
     @PostMapping
     public ResponseEntity<TaskResponseDto> addNewTask(@RequestBody TaskRequestDto requestDto) {
-        TaskResponseDto task = convertFromRequestToResponseDto(requestDto);
-
+        TaskResponseDto task = taskService.addTask(requestDto);
         return new ResponseEntity<>(task, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Изменение Задачи")
     @PutMapping
-    public ResponseEntity<TaskResponseDto> editTask(@RequestBody TaskRequestDto requestDto) {
-        TaskResponseDto task = convertFromRequestToResponseDto(requestDto);
-
+    public ResponseEntity<TaskResponseDto> updateTask(@RequestBody TaskRequestDto requestDto) {
+        TaskResponseDto task = taskService.updateTask(requestDto);
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 
     @Operation(summary = "Удаление конкретной Задачи по её id")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<String> deleteTaskById(@PathVariable Long id) {
-
+        taskService.deleteTask(id);
         return new ResponseEntity<>(
                 String.format("Задача с id #%s была успешно удалена", id),
                 HttpStatus.OK
         );
     }
 
-    private TaskResponseDto convertFromRequestToResponseDto(TaskRequestDto requestDto) {
-        return modelMapper.map(requestDto, TaskResponseDto.class);
-    }
-
     @ExceptionHandler(TaskNotFoundException.class)
     public ResponseEntity handleNotFoundException(TaskNotFoundException e) {
-        return new ResponseEntity(HttpStatus.NOT_FOUND);
+        return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
