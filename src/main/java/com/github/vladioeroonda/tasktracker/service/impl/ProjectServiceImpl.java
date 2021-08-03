@@ -82,7 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public void checkProjectExistsById(Long id) {
-        if(projectRepository.findById(id).isEmpty()){
+        if (projectRepository.findById(id).isEmpty()) {
             ProjectNotFoundException exception =
                     new ProjectNotFoundException(String.format("Проект с id #%d не существует", id));
             logger.error(exception.getMessage(), exception);
@@ -111,10 +111,10 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponseDto updateProject(ProjectRequestDto projectRequestDto) {
         logger.info(String.format("Обновление Проекта с id #%d", projectRequestDto.getId()));
 
-        if(projectRequestDto.getStatus()==ProjectStatus.FINISHED){
+        if (projectRequestDto.getStatus() == ProjectStatus.FINISHED) {
             ProjectBadDataException exception =
                     new ProjectBadDataException("Недопустимый статус задачи");
-            logger.error(exception.getMessage(),exception);
+            logger.error(exception.getMessage(), exception);
             throw exception;
         }
 

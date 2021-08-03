@@ -21,6 +21,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query(value =
             "UPDATE Task t " +
                     "SET t.status = com.github.vladioeroonda.tasktracker.model.TaskStatus.CANCELLED " +
-                    "WHERE t.release.id = :id")
+                    "WHERE t.release.id = :id " +
+                    "AND NOT t.status = com.github.vladioeroonda.tasktracker.model.TaskStatus.DONE")
     void setAllTasksCancelled(@Param("id") Long id);
 }

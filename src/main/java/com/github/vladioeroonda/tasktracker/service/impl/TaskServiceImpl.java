@@ -18,6 +18,7 @@ import com.github.vladioeroonda.tasktracker.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +28,11 @@ import java.util.stream.Collectors;
 @Service
 public class TaskServiceImpl implements TaskService {
     private static final Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);
-    private static final int TASK_NAME_MIN_LENGTH = 5;
-    private static final int TASK_DESCRIPTION_MIN_LENGTH = 20;
+
+    @Value("${task.min-length.name}")
+    private int minNameLength;
+    @Value("${task.min-length.description}")
+    private int minDescriptionLength;
 
     private final TaskRepository taskRepository;
     private final ProjectService projectService;
@@ -116,23 +120,26 @@ public class TaskServiceImpl implements TaskService {
         taskForSave.setId(null);
         taskForSave.setStatus(TaskStatus.BACKLOG);
 
-        if (taskRequestDto.getName().length() < TASK_NAME_MIN_LENGTH) {
-            TaskBadDataException exception =
-                    new TaskBadDataException(String.format("Слишком короткое имя Задачи. Должно быть длиннее %d символов", TASK_NAME_MIN_LENGTH));
-            logger.error(exception.getMessage(), exception);
-            throw exception;
-        }
-
-        if (taskRequestDto.getDescription().length() < TASK_DESCRIPTION_MIN_LENGTH) {
+        if (taskRequestDto.getName().length() < minNameLength) {
             TaskBadDataException exception =
                     new TaskBadDataException(
-                            String.format("Слишком короткое описание Задачи. Должно быть длиннее %d символов", TASK_DESCRIPTION_MIN_LENGTH)
+                            String.format("Слишком короткое имя Задачи. Должно быть длиннее %d символов", minNameLength)
                     );
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
 
-        Project project = projectService.getProjectByIdAndReturnEntity(taskRequestDto.getProject().getId());
+        if (taskRequestDto.getDescription().length() < minDescriptionLength) {
+            TaskBadDataException exception =
+                    new TaskBadDataException(
+                            String.format("Слишком короткое описание Задачи. Должно быть длиннее %d символов", minDescriptionLength)
+                    );
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
+
+        Project project =
+                projectService.getProjectByIdAndReturnEntity(taskRequestDto.getProject().getId());
 
         if (project.getStatus() == ProjectStatus.FINISHED) {
             TaskBadDataException exception =
@@ -142,14 +149,26 @@ public class TaskServiceImpl implements TaskService {
         }
         taskForSave.setProject(project);
 
-        Release release = releaseService.getReleaseByIdAndReturnEntity(taskRequestDto.getRelease().getId());
+        Release release =
+                releaseService.getReleaseByIdAndReturnEntity(taskRequestDto.getRelease().getId());
+
+        if (release.getFinishTime() != null) {
+            TaskBadDataException exception =
+                    new TaskBadDataException("Вы пытаетесь добавить задачу в уже закрытый релиз");
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
         taskForSave.setRelease(release);
 
-        User author = userService.getUserByIdAndReturnEntity(taskRequestDto.getAuthor().getId());
+
+
+        User author =
+                userService.getUserByIdAndReturnEntity(taskRequestDto.getAuthor().getId());
         taskForSave.setAuthor(author);
 
         if (taskRequestDto.getExecutor() != null) {
-            User executor = userService.getUserByIdAndReturnEntity(taskRequestDto.getExecutor().getId());
+            User executor =
+                    userService.getUserByIdAndReturnEntity(taskRequestDto.getExecutor().getId());
             taskForSave.setExecutor(executor);
         }
 
@@ -177,12 +196,14 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     @Override
     public int countUnfinishedTasksByReleaseId(Long id) {
+        releaseService.checkReleaseExistsById(id);
         return taskRepository.countUnfinishedTasksByReleaseId(id);
     }
 
     @Transactional
     @Override
     public void setAllTasksCancelled(Long id) {
+        releaseService.checkReleaseExistsById(id);
         taskRepository.setAllTasksCancelled(id);
     }
 

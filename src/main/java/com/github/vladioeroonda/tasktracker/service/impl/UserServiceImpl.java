@@ -8,7 +8,6 @@ import com.github.vladioeroonda.tasktracker.model.Role;
 import com.github.vladioeroonda.tasktracker.model.User;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.UserService;
-import liquibase.pro.packaged.U;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +79,7 @@ public class UserServiceImpl implements UserService {
     public void checkUserExistsById(Long id) {
         logger.info(String.format("Проверка существования Пользователя с id #%d", id));
 
-        if(userRepository.findById(id).isEmpty()){
+        if (userRepository.findById(id).isEmpty()) {
             UserNotFoundException exception =
                     new UserNotFoundException(String.format("Пользователь с id #%d не существует.", id));
             logger.error(exception.getMessage(), exception);
@@ -93,7 +92,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto addUser(UserRequestDto userRequestDto) {
         logger.info("Добавление Пользователя");
 
-        if (userRepository.getUserByLogin(userRequestDto.getLogin()).isPresent()){
+        if (userRepository.getUserByLogin(userRequestDto.getLogin()).isPresent()) {
             UserBadDataException exception =
                     new UserBadDataException("Пользователь с таким логином уже существует");
             logger.error(exception.getMessage(), exception);
@@ -127,7 +126,7 @@ public class UserServiceImpl implements UserService {
                     throw exception;
                 });
 
-        if (userFromDB.getLogin().equals(userRequestDto.getLogin())){
+        if (userFromDB.getLogin().equals(userRequestDto.getLogin())) {
             UserBadDataException exception =
                     new UserBadDataException("Пользователь с таким логином уже существует");
             logger.error(exception.getMessage(), exception);

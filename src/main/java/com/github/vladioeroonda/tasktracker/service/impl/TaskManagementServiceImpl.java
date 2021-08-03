@@ -9,17 +9,22 @@ import com.github.vladioeroonda.tasktracker.repository.TaskRepository;
 import com.github.vladioeroonda.tasktracker.service.ProjectService;
 import com.github.vladioeroonda.tasktracker.service.ReleaseService;
 import com.github.vladioeroonda.tasktracker.service.TaskManagementService;
-import com.github.vladioeroonda.tasktracker.service.TaskService;
 import com.github.vladioeroonda.tasktracker.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TaskManagementServiceImpl implements TaskManagementService {
     private static final Logger logger = LoggerFactory.getLogger(TaskManagementServiceImpl.class);
+
+    @Value("${task.min-length.name}")
+    private int minNameLength;
+    @Value("${task.min-length.description}")
+    private int minDescriptionLength;
 
     private final TaskRepository taskRepository;
     private final UserService userService;
@@ -43,10 +48,28 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
     @Transactional
     @Override
-    public TaskResponseDto closeTask(TaskRequestDto taskRequestDto) {
+    public TaskResponseDto updateTask(TaskRequestDto taskRequestDto) {
         logger.info("Выполнение Задачи (изменение полей)");
 
         fieldsCheckForExisting(taskRequestDto);
+
+        if (taskRequestDto.getName().length() < minNameLength) {
+            TaskBadDataException exception =
+                    new TaskBadDataException(
+                            String.format("Слишком короткое имя Задачи. Должно быть длиннее %d символов", minNameLength)
+                    );
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
+
+        if (taskRequestDto.getDescription().length() < minDescriptionLength) {
+            TaskBadDataException exception =
+                    new TaskBadDataException(
+                            String.format("Слишком короткое описание Задачи. Должно быть длиннее %d символов", minDescriptionLength)
+                    );
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
 
         if (!taskRequestDto.getStatus().equals(TaskStatus.BACKLOG) && taskRequestDto.getExecutor() == null) {
             TaskBadDataException exception =

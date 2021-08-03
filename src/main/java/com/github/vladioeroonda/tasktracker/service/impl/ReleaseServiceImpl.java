@@ -6,6 +6,7 @@ import com.github.vladioeroonda.tasktracker.exception.ReleaseBadDataException;
 import com.github.vladioeroonda.tasktracker.exception.ReleaseNotFoundException;
 import com.github.vladioeroonda.tasktracker.model.Release;
 import com.github.vladioeroonda.tasktracker.repository.ReleaseRepository;
+import com.github.vladioeroonda.tasktracker.service.ProjectService;
 import com.github.vladioeroonda.tasktracker.service.ReleaseService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -22,10 +23,16 @@ public class ReleaseServiceImpl implements ReleaseService {
     private static final Logger logger = LoggerFactory.getLogger(ReleaseServiceImpl.class);
 
     private final ReleaseRepository releaseRepository;
+    private final ProjectService projectService;
     private final ModelMapper modelMapper;
 
-    public ReleaseServiceImpl(ReleaseRepository releaseRepository, ModelMapper modelMapper) {
+    public ReleaseServiceImpl(
+            ReleaseRepository releaseRepository,
+            ProjectService projectService,
+            ModelMapper modelMapper
+    ) {
         this.releaseRepository = releaseRepository;
+        this.projectService = projectService;
         this.modelMapper = modelMapper;
     }
 
@@ -112,7 +119,7 @@ public class ReleaseServiceImpl implements ReleaseService {
                     return exception;
                 });
 
-        if(releaseRequestDto.getFinishTime()!=null){
+        if (releaseRequestDto.getFinishTime() != null) {
             ReleaseBadDataException exception =
                     new ReleaseBadDataException("Закрытие Релиза возможно только через эндпоинт Управления");
             logger.error(exception.getMessage(), exception);
@@ -146,7 +153,8 @@ public class ReleaseServiceImpl implements ReleaseService {
 
     @Transactional
     @Override
-    public List<Release> getAllNotClosedReleasesByProjectId(Long id){
+    public List<Release> getAllNotClosedReleasesByProjectId(Long id) {
+        projectService.checkProjectExistsById(id);
         return releaseRepository.getAllNotClosedReleasesByProjectId(id);
     }
 

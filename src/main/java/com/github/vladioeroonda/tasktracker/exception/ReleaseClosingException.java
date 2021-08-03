@@ -1,6 +1,6 @@
 package com.github.vladioeroonda.tasktracker.exception;
 
-public class ReleaseClosingException extends RuntimeException{
+public class ReleaseClosingException extends RuntimeException {
     public ReleaseClosingException() {
     }
 

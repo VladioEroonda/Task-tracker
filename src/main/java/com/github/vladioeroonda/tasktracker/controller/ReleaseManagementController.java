@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +28,7 @@ public class ReleaseManagementController {
     @GetMapping(value = "/{id}")
     public ResponseEntity<String> countUnfinishedTasksByReleaseId(@PathVariable Long id) {
         int count = releaseManagementService.countUnfinishedTasksByReleaseId(id);
-        return new ResponseEntity<>(String.format("В релиз с id #%d не завершатся %d задач", id, count), HttpStatus.OK);
+        return new ResponseEntity<>(String.format("В релиз с id #%d не завершатся %d задач(и)", id, count), HttpStatus.OK);
     }
 
     @Operation(summary = "Изменение/закрытие релиза")

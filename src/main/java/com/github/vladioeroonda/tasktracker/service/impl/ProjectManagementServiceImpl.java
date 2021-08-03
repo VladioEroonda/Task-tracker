@@ -47,7 +47,8 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
         logger.info("Закрытие проекта");
 
         if (projectRequestDto.getProjectStatus() != ProjectStatus.FINISHED) {
-            ProjectClosingException exception = new ProjectClosingException("Вы пытаетесь сменить статус проекта на отличный от FINISHED");
+            ProjectClosingException exception =
+                    new ProjectClosingException("Вы пытаетесь сменить статус проекта на отличный от FINISHED");
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -55,8 +56,10 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
         Project projectFromBD = projectRepository
                 .findById(projectRequestDto.getId())
                 .orElseThrow(() -> {
-                    ProjectNotFoundException exception = new ProjectNotFoundException(
-                            String.format("Проект с id #%d не существует. Закрытие невозможно", projectRequestDto.getId()));
+                    ProjectNotFoundException exception =
+                            new ProjectNotFoundException(
+                                    String.format("Проект с id #%d не существует. Закрытие невозможно", projectRequestDto.getId())
+                            );
                     logger.error(exception.getMessage(), exception);
                     return exception;
                 });
@@ -67,35 +70,15 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
             throw exception;
         }
 
-
-
         List<Release> notClosedReleases =
                 releaseService.getAllNotClosedReleasesByProjectId(projectRequestDto.getId()) == null ?
                         new ArrayList<>() : releaseService.getAllNotClosedReleasesByProjectId(projectRequestDto.getId());
 
-        System.out.println("OPA" + notClosedReleases);
-
         if (notClosedReleases.size() > 0) {
-            ProjectClosingException exception = new ProjectClosingException(
-                    String.format(
-                            "Вы пытаетесь закрыть проект, в котором остались незакрытые релизы (%d)",
-                            notClosedReleases.size()
-                    ));
-            logger.error(exception.getMessage(), exception);
-            throw exception;
-        }
-
-        int unfinishedTasks = taskService.countUnfinishedTasksByReleaseId(projectFromBD.getId());
-
-        logger.debug("unfinishedTasks: ",unfinishedTasks);
-        System.out.println(unfinishedTasks);
-
-        if (unfinishedTasks > 0) {
-            ProjectClosingException exception = new ProjectClosingException(
-                    String.format(
-                            "Вы пытаетесь закрыть проект, в котором остались незакрытые задачи (%d)",
-                            unfinishedTasks
-                    ));
+            ProjectClosingException exception =
+                    new ProjectClosingException(
+                            String.format("Вы пытаетесь закрыть проект, в котором остались незакрытые релизы (%d)", notClosedReleases.size())
+                    );
             logger.error(exception.getMessage(), exception);
             throw exception;
         }

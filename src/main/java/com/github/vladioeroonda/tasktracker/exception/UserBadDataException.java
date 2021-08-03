@@ -1,6 +1,6 @@
 package com.github.vladioeroonda.tasktracker.exception;
 
-public class UserBadDataException extends RuntimeException{
+public class UserBadDataException extends RuntimeException {
     public UserBadDataException() {
     }
 
