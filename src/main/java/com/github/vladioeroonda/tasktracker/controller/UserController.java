@@ -2,14 +2,12 @@ package com.github.vladioeroonda.tasktracker.controller;
 
 import com.github.vladioeroonda.tasktracker.dto.request.UserRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.UserResponseDto;
-import com.github.vladioeroonda.tasktracker.exception.UserNotFoundException;
 import com.github.vladioeroonda.tasktracker.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +39,7 @@ public class UserController {
     @Operation(summary = "Получение конкретного Пользователя по его id")
     @GetMapping(value = "/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
-        UserResponseDto user = userService.getUserById(id);
+        UserResponseDto user = userService.getUserByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
@@ -64,13 +62,8 @@ public class UserController {
     public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
         userService.deleteUser(id);
         return new ResponseEntity<>(
-                String.format("Пользователь с id #%s был успешно удалён", id),
+                String.format("Пользователь с id #%d был успешно удалён", id),
                 HttpStatus.OK
         );
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity handleNotFoundException(UserNotFoundException e) {
-        return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
