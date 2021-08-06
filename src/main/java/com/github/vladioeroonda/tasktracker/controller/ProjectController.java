@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,8 @@ public class ProjectController {
 
     @Operation(summary = "Получение списка всех Проектов")
     @GetMapping
+
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<List<ProjectResponseDto>> getAllProjects() {
         List<ProjectResponseDto> projects = projectService.getAllProjects();
         return new ResponseEntity<>(projects, HttpStatus.OK);
@@ -38,6 +41,7 @@ public class ProjectController {
 
     @Operation(summary = "Получение конкретного Проекта по его id")
     @GetMapping(value = "/{id}")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable Long id) {
         ProjectResponseDto project = projectService.getProjectByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(project, HttpStatus.OK);
@@ -45,6 +49,7 @@ public class ProjectController {
 
     @Operation(summary = "Добавление нового Проекта")
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ProjectResponseDto> addNewProject(@RequestBody ProjectRequestDto requestDto) {
         ProjectResponseDto project = projectService.addProject(requestDto);
         return new ResponseEntity<>(project, HttpStatus.CREATED);
@@ -52,6 +57,7 @@ public class ProjectController {
 
     @Operation(summary = "Изменение Проекта")
     @PutMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ProjectResponseDto> updateProject(@RequestBody ProjectRequestDto requestDto) {
         ProjectResponseDto project = projectService.updateProject(requestDto);
         return new ResponseEntity<>(project, HttpStatus.OK);
@@ -59,6 +65,7 @@ public class ProjectController {
 
     @Operation(summary = "Удаление конкретного Проекта по его id")
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> deleteProjectById(@PathVariable Long id) {
         projectService.deleteProject(id);
         return new ResponseEntity<>(

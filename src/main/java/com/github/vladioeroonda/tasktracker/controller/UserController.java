@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ public class UserController {
 
     @Operation(summary = "Получение списка всех Пользователей")
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<UserResponseDto>> getAllUsers() {
         List<UserResponseDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
@@ -38,6 +40,7 @@ public class UserController {
 
     @Operation(summary = "Получение конкретного Пользователя по его id")
     @GetMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         UserResponseDto user = userService.getUserByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
@@ -45,6 +48,7 @@ public class UserController {
 
     @Operation(summary = "Добавление нового Пользователя")
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserResponseDto> addNewUser(@RequestBody UserRequestDto requestDto) {
         UserResponseDto user = userService.addUser(requestDto);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
@@ -52,6 +56,7 @@ public class UserController {
 
     @Operation(summary = "Изменение Пользователя")
     @PutMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserResponseDto> updateUser(@RequestBody UserRequestDto requestDto) {
         UserResponseDto user = userService.updateUser(requestDto);
         return new ResponseEntity<>(user, HttpStatus.OK);
@@ -59,6 +64,7 @@ public class UserController {
 
     @Operation(summary = "Удаление конкретного Пользователя по его id")
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
         userService.deleteUser(id);
         return new ResponseEntity<>(

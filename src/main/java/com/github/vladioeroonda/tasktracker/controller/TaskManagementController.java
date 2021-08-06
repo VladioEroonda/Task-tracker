@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,7 @@ public class TaskManagementController {
 
     @Operation(summary = "Изменение Задачи")
     @PutMapping
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<TaskResponseDto> updateTask(@RequestBody TaskRequestDto requestDto) {
         TaskResponseDto task = taskManagementService.updateTask(requestDto);
         return new ResponseEntity<>(task, HttpStatus.OK);

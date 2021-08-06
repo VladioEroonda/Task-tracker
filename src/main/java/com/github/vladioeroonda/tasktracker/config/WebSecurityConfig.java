@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -15,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
-//@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserServiceImpl userDetailsService;
@@ -30,23 +31,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/api/**").hasRole(Role.ADMIN.name())
-                .antMatchers("/").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/tracker/project/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+                .antMatchers(HttpMethod.GET, "/api/tracker/release/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+                .antMatchers(HttpMethod.GET, "/api/tracker/task/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+//                .antMatchers(HttpMethod.GET, "/api/tracker/user/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+                .antMatchers("/api/tracker/task/management/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+                .antMatchers("/api/tracker/task/**").hasAuthority(Role.ADMIN.name())
+                .antMatchers("/api/tracker/project/management/**").hasAuthority(Role.ADMIN.name())
+                .antMatchers("/api/tracker/project/**").hasAuthority(Role.ADMIN.name())
+                .antMatchers("/api/tracker/release/management/**").hasAuthority(Role.ADMIN.name())
+                .antMatchers("/api/tracker/release/**").hasAuthority(Role.ADMIN.name())
+                .antMatchers("/api/tracker/user/**").hasAuthority(Role.ADMIN.name())
                 .anyRequest().authenticated()
-//                .antMatchers(HttpMethod.POST, "/api/**").hasAnyRole(Role.ADMIN.name())
-//                .antMatchers(HttpMethod.PUT, "/api/**").hasAnyRole(Role.ADMIN.name())
-//                .antMatchers(HttpMethod.DELETE, "/api/**").hasAnyRole(Role.ADMIN.name())
-//                .antMatchers(HttpMethod.PATCH, "/api/**").hasAnyRole(Role.ADMIN.name())
-
                 .and()
-                .httpBasic()
-                .and()
-                .logout()
-                .logoutUrl("/logout")
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .deleteCookies("JSESSIONID");
-
+                .httpBasic();
     }
 
     @Override

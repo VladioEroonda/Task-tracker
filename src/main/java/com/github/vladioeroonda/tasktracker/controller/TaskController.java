@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,7 @@ public class TaskController {
 
     @Operation(summary = "Получение списка всех Задач")
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<List<TaskResponseDto>> getAllTasks() {
         List<TaskResponseDto> tasks = taskService.getAllTasks();
         return new ResponseEntity<>(tasks, HttpStatus.OK);
@@ -37,6 +39,7 @@ public class TaskController {
 
     @Operation(summary = "Получение конкретной Задачи по её id")
     @GetMapping(value = "/{id}")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<TaskResponseDto> getTaskById(@PathVariable Long id) {
         TaskResponseDto task = taskService.getTaskByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(task, HttpStatus.OK);
@@ -44,6 +47,7 @@ public class TaskController {
 
     @Operation(summary = "Добавление новой Задачи")
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<TaskResponseDto> addNewTask(@RequestBody TaskRequestDto requestDto) {
         TaskResponseDto task = taskService.addTask(requestDto);
         return new ResponseEntity<>(task, HttpStatus.CREATED);
@@ -51,6 +55,7 @@ public class TaskController {
 
     @Operation(summary = "Удаление конкретной Задачи по её id")
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> deleteTaskById(@PathVariable Long id) {
         taskService.deleteTask(id);
         return new ResponseEntity<>(

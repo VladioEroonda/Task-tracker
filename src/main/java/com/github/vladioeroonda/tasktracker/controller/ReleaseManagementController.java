@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,7 @@ public class ReleaseManagementController {
 
     @Operation(summary = "Подсчет количества задач, не завершившихся в заданный релиз")
     @GetMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> countUnfinishedTasksByReleaseId(@PathVariable Long id) {
         int count = releaseManagementService.countUnfinishedTasksByReleaseId(id);
         return new ResponseEntity<>(String.format("В релиз с id #%d не завершатся %d задач(и)", id, count), HttpStatus.OK);
@@ -33,6 +35,7 @@ public class ReleaseManagementController {
 
     @Operation(summary = "Изменение/закрытие релиза")
     @PatchMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ReleaseResponseDto> closeRelease(@RequestBody ReleaseClosingRequestDto requestDto) {
         ReleaseResponseDto release = releaseManagementService.closeRelease(requestDto);
         return new ResponseEntity<>(release, HttpStatus.OK);

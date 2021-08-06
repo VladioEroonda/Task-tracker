@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ public class ReleaseController {
 
     @Operation(summary = "Получение списка всех Релизов")
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<List<ReleaseResponseDto>> getAllReleases() {
         List<ReleaseResponseDto> releases = releaseService.getAllReleases();
         return new ResponseEntity<>(releases, HttpStatus.OK);
@@ -38,6 +40,7 @@ public class ReleaseController {
 
     @Operation(summary = "Получение конкретного Релиза по его id")
     @GetMapping(value = "/{id}")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<ReleaseResponseDto> getReleaseById(@PathVariable Long id) {
         ReleaseResponseDto release = releaseService.getReleaseByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(release, HttpStatus.OK);
@@ -45,6 +48,7 @@ public class ReleaseController {
 
     @Operation(summary = "Добавление нового Релиза")
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ReleaseResponseDto> addNewRelease(@RequestBody ReleaseRequestDto requestDto) {
         ReleaseResponseDto release = releaseService.addRelease(requestDto);
         return new ResponseEntity<>(release, HttpStatus.CREATED);
@@ -52,6 +56,7 @@ public class ReleaseController {
 
     @Operation(summary = "Изменение Релиза")
     @PutMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ReleaseResponseDto> updateRelease(@RequestBody ReleaseRequestDto requestDto) {
         ReleaseResponseDto release = releaseService.updateRelease(requestDto);
         return new ResponseEntity<>(release, HttpStatus.OK);
@@ -59,6 +64,7 @@ public class ReleaseController {
 
     @Operation(summary = "Удаление конкретного Релиза по его id")
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> deleteReleaseById(@PathVariable Long id) {
         releaseService.deleteRelease(id);
         return new ResponseEntity<>(
