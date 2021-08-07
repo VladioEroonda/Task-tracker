@@ -19,6 +19,10 @@ public class UserRequestDto {
     public UserRequestDto() {
     }
 
+    public UserRequestDto(Long id) {
+        this.id = id;
+    }
+
     public UserRequestDto(
             Long id,
             String login,

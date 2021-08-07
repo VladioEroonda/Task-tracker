@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -51,6 +53,14 @@ public class TaskController {
     public ResponseEntity<TaskResponseDto> addNewTask(@RequestBody TaskRequestDto requestDto) {
         TaskResponseDto task = taskService.addTask(requestDto);
         return new ResponseEntity<>(task, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Добавление новых Задач(и) через CSV-файл")
+    @PostMapping(value = "/csv")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<TaskResponseDto>> addNewTaskByCsv(@RequestParam("file") MultipartFile file) {
+        List<TaskResponseDto> tasks = taskService.addTaskByCsv(file);
+        return new ResponseEntity<>(tasks, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Удаление конкретной Задачи по её id")

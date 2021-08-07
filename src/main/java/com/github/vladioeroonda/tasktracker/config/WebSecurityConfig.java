@@ -36,6 +36,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/tracker/task/management/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
                 .antMatchers("/api/tracker/task/filter/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
                 .antMatchers("/api/tracker/task/**").hasAuthority(Role.ADMIN.name())
+                .antMatchers("/api/tracker/task/csv/**").hasAuthority(Role.ADMIN.name())
                 .antMatchers("/api/tracker/project/management/**").hasAuthority(Role.ADMIN.name())
                 .antMatchers("/api/tracker/project/**").hasAuthority(Role.ADMIN.name())
                 .antMatchers("/api/tracker/release/management/**").hasAuthority(Role.ADMIN.name())

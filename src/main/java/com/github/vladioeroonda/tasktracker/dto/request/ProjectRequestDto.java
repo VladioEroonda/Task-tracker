@@ -17,6 +17,10 @@ public class ProjectRequestDto {
     public ProjectRequestDto() {
     }
 
+    public ProjectRequestDto(Long id) {
+        this.id = id;
+    }
+
     public ProjectRequestDto(
             Long id,
             String name,
