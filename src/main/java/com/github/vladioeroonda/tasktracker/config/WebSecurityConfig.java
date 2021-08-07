@@ -25,7 +25,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         this.userDetailsService = userDetailsService;
     }
 
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -34,8 +33,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/api/tracker/project/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
                 .antMatchers(HttpMethod.GET, "/api/tracker/release/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
                 .antMatchers(HttpMethod.GET, "/api/tracker/task/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
-//                .antMatchers(HttpMethod.GET, "/api/tracker/user/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
                 .antMatchers("/api/tracker/task/management/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+                .antMatchers("/api/tracker/task/filter/**").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
                 .antMatchers("/api/tracker/task/**").hasAuthority(Role.ADMIN.name())
                 .antMatchers("/api/tracker/project/management/**").hasAuthority(Role.ADMIN.name())
                 .antMatchers("/api/tracker/project/**").hasAuthority(Role.ADMIN.name())
