@@ -3,9 +3,12 @@ package com.github.vladioeroonda.tasktracker.controller;
 import com.github.vladioeroonda.tasktracker.dto.response.TaskResponseDto;
 import com.github.vladioeroonda.tasktracker.model.TaskStatus;
 import com.github.vladioeroonda.tasktracker.service.TaskFilterService;
+import com.github.vladioeroonda.tasktracker.service.impl.ProjectManagementServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tracker/task/filter")
 public class TaskFilterController {
+    private static final Logger logger = LoggerFactory.getLogger(TaskFilterController.class);
 
     private final TaskFilterService taskFilterService;
 
@@ -39,6 +43,7 @@ public class TaskFilterController {
             @Parameter(description = "Имя автора в задаче") @RequestParam(required = false) String authorName,
             @Parameter(description = "Имя исполнителя в задаче") @RequestParam(required = false) String executorName
     ) {
+        logger.info("GET /api/tracker/task/filter");
         List<TaskResponseDto> result = taskFilterService.getFilteredTasks(
                 name, description, status, projectName,
                 releaseVersion, authorName, executorName

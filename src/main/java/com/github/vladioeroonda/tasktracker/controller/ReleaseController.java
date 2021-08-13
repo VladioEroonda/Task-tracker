@@ -3,8 +3,11 @@ package com.github.vladioeroonda.tasktracker.controller;
 import com.github.vladioeroonda.tasktracker.dto.request.ReleaseRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ReleaseResponseDto;
 import com.github.vladioeroonda.tasktracker.service.ReleaseService;
+import com.github.vladioeroonda.tasktracker.service.impl.ProjectManagementServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tracker/release")
 public class ReleaseController {
+    private static final Logger logger = LoggerFactory.getLogger(ReleaseController.class);
 
     private final ReleaseService releaseService;
 
@@ -34,6 +38,7 @@ public class ReleaseController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<List<ReleaseResponseDto>> getAllReleases() {
+        logger.info("GET /api/tracker/release");
         List<ReleaseResponseDto> releases = releaseService.getAllReleases();
         return new ResponseEntity<>(releases, HttpStatus.OK);
     }
@@ -42,6 +47,7 @@ public class ReleaseController {
     @GetMapping(value = "/{id}")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<ReleaseResponseDto> getReleaseById(@PathVariable Long id) {
+        logger.info("GET /api/tracker/release/{id}");
         ReleaseResponseDto release = releaseService.getReleaseByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(release, HttpStatus.OK);
     }
@@ -50,6 +56,7 @@ public class ReleaseController {
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ReleaseResponseDto> addNewRelease(@RequestBody ReleaseRequestDto requestDto) {
+        logger.info("POST /api/tracker/release");
         ReleaseResponseDto release = releaseService.addRelease(requestDto);
         return new ResponseEntity<>(release, HttpStatus.CREATED);
     }
@@ -58,6 +65,7 @@ public class ReleaseController {
     @PutMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ReleaseResponseDto> updateRelease(@RequestBody ReleaseRequestDto requestDto) {
+        logger.info("PUT /api/tracker/release");
         ReleaseResponseDto release = releaseService.updateRelease(requestDto);
         return new ResponseEntity<>(release, HttpStatus.OK);
     }
@@ -66,6 +74,7 @@ public class ReleaseController {
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> deleteReleaseById(@PathVariable Long id) {
+        logger.info("DELETE /api/tracker/release/{id}");
         releaseService.deleteRelease(id);
         return new ResponseEntity<>(
                 String.format("Релиз с id #%d был успешно удалён", id),

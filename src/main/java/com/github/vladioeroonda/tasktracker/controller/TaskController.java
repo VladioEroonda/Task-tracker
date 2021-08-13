@@ -3,8 +3,11 @@ package com.github.vladioeroonda.tasktracker.controller;
 import com.github.vladioeroonda.tasktracker.dto.request.TaskRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.TaskResponseDto;
 import com.github.vladioeroonda.tasktracker.service.TaskService;
+import com.github.vladioeroonda.tasktracker.service.impl.ProjectManagementServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tracker/task")
 public class TaskController {
+    private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
 
     private final TaskService taskService;
 
@@ -35,6 +39,7 @@ public class TaskController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<List<TaskResponseDto>> getAllTasks() {
+        logger.info("GET /api/tracker/task");
         List<TaskResponseDto> tasks = taskService.getAllTasks();
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
@@ -43,6 +48,7 @@ public class TaskController {
     @GetMapping(value = "/{id}")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<TaskResponseDto> getTaskById(@PathVariable Long id) {
+        logger.info("GET /api/tracker/task/{id}");
         TaskResponseDto task = taskService.getTaskByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
@@ -51,6 +57,7 @@ public class TaskController {
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<TaskResponseDto> addNewTask(@RequestBody TaskRequestDto requestDto) {
+        logger.info("POST /api/tracker/task");
         TaskResponseDto task = taskService.addTask(requestDto);
         return new ResponseEntity<>(task, HttpStatus.CREATED);
     }
@@ -59,6 +66,7 @@ public class TaskController {
     @PostMapping(value = "/csv")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<TaskResponseDto>> addNewTaskByCsv(@RequestParam("file") MultipartFile file) {
+        logger.info("POST /api/tracker/task");
         List<TaskResponseDto> tasks = taskService.addTaskByCsv(file);
         return new ResponseEntity<>(tasks, HttpStatus.CREATED);
     }
@@ -67,6 +75,7 @@ public class TaskController {
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> deleteTaskById(@PathVariable Long id) {
+        logger.info("DELETE /api/tracker/task/{id}");
         taskService.deleteTask(id);
         return new ResponseEntity<>(
                 String.format("Задача с id #%d была успешно удалена", id),

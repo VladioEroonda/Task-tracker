@@ -53,6 +53,24 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
         fieldsCheckForExisting(taskRequestDto);
 
+        if (taskRequestDto.getName()==null){
+            TaskBadDataException exception =
+                    new TaskBadDataException(
+                            "Не указано имя Задачи"
+                    );
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
+
+        if (taskRequestDto.getDescription()==null){
+            TaskBadDataException exception =
+                    new TaskBadDataException(
+                            "Не указано описание Задачи"
+                    );
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
+
         if (taskRequestDto.getName().length() < minNameLength) {
             TaskBadDataException exception =
                     new TaskBadDataException(
