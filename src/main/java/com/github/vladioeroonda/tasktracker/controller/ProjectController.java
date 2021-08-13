@@ -32,7 +32,6 @@ public class ProjectController {
 
     @Operation(summary = "Получение списка всех Проектов")
     @GetMapping
-
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<List<ProjectResponseDto>> getAllProjects() {
         List<ProjectResponseDto> projects = projectService.getAllProjects();
