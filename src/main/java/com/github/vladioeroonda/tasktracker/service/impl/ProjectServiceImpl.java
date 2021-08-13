@@ -4,6 +4,7 @@ import com.github.vladioeroonda.tasktracker.dto.request.ProjectRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ProjectResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.ProjectBadDataException;
 import com.github.vladioeroonda.tasktracker.exception.ProjectNotFoundException;
+import com.github.vladioeroonda.tasktracker.feign.PaymentClient;
 import com.github.vladioeroonda.tasktracker.model.Project;
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
 import com.github.vladioeroonda.tasktracker.model.User;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,15 +28,18 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final UserService userService;
     private final ModelMapper modelMapper;
+    private final PaymentClient paymentClient;
 
     public ProjectServiceImpl(
             ProjectRepository projectRepository,
             UserService userService,
-            ModelMapper modelMapper
+            ModelMapper modelMapper,
+            PaymentClient paymentClient
     ) {
         this.projectRepository = projectRepository;
         this.userService = userService;
         this.modelMapper = modelMapper;
+        this.paymentClient = paymentClient;
     }
 
     @Transactional
@@ -94,6 +99,18 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponseDto addProject(ProjectRequestDto projectRequestDto) {
         logger.info("Добавление нового Проекта");
+
+        boolean isPaid = paymentClient.getPaymentCheckResult(
+                "1dbede56-a6da-42c9-a932-c9c8a35fa828",
+                "7c53ac15-204b-4a04-8071-58424ab66e3a",
+                new BigDecimal("3000"),
+                "proj2");
+//                projectRequestDto.getName());
+        System.out.println(isPaid);//TODO:тут захардкожено какбе, поменяй
+
+        if (!isPaid) {
+            throw new ProjectBadDataException("За данный проект оплаты не поступало. Создание невозможно.");
+        }
 
         Project projectForSave = convertFromRequestToEntity(projectRequestDto);
         projectForSave.setId(null);
