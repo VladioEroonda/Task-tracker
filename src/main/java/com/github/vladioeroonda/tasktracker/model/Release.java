@@ -23,7 +23,7 @@ public class Release {
     private String version;
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
-    @Column(name = "finish_time", nullable = false)
+    @Column(name = "finish_time")
     private LocalDateTime finishTime;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "release", orphanRemoval = true)
     private List<Task> tasks;
