@@ -3,6 +3,7 @@ package com.github.vladioeroonda.tasktracker.service;
 import com.github.vladioeroonda.tasktracker.dto.request.TaskRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.TaskResponseDto;
 import com.github.vladioeroonda.tasktracker.model.Task;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -83,6 +84,33 @@ public interface TaskService {
      * @return TaskRequestDto - объект (обёртка) добавленной Задачи
      */
     TaskResponseDto addTask(TaskRequestDto taskRequestDto);
+
+    /**
+     * Добавление задачи с использованием CSV-файла
+     *
+     * Заголовок: 'Name,Description,ProjectId,ReleaseId,AuthorId,ExecutorId', где:
+     * Name - имя задачи (обязательно),
+     * Description - описание Задачи (обязательно),
+     * ProjectId - ID Проекта Задачи (обязательно),
+     * ReleaseId - ID Релиза Задачи (обязательно),
+     * AuthorId - ID Автора Задачи (обязательно),
+     * ExecutorId - ID Исполнителя Задачи (необязательно).
+     *
+     * Выбрасываемые исключения:
+     *
+     * <li> WrongFileTypeException:
+     * - если загруженный файл не .csv
+     * <li> CSVParsingException
+     * - если есть ошибки при парсе файла
+     *
+     * Так же могут выбрасываться исключения из метода:
+     * @see #addTask(TaskRequestDto)
+     *
+     *
+     * @param file (MultipartFile), представляет собой загружаемый CSV-файл
+     * @return TaskResponseDto -список добавленных Задач (в виде обёрток)
+     */
+    List<TaskResponseDto> addTaskByCsv(MultipartFile file);
 
     /**
      * Удаление конкретной Задачи по её ID

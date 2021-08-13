@@ -1,5 +1,8 @@
 package com.github.vladioeroonda.tasktracker.model;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -14,19 +17,23 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "user", schema = "public")
-public class User {
+public class User implements UserDetails, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, unique = true)
     private String login;
+    @Column(nullable = false)
+    private String password;
     @Column(nullable = false)
     private String name;
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
@@ -104,6 +111,15 @@ public class User {
         this.tasksAsExecutor = tasksAsExecutor;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
     public void addAuthorTask(Task task) {
         if (this.tasksAsAuthor == null) {
             this.tasksAsAuthor = new ArrayList<>();
@@ -150,5 +166,46 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id, login, name, roles, tasksAsAuthor, tasksAsExecutor);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles;
+    }
+
+    @Override
+    public String getUsername() {
+        return login;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                ", name='" + name + '\'' +
+                ", roles=" + roles +
+                '}';
     }
 }

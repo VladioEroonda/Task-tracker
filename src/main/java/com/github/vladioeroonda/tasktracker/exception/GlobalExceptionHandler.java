@@ -13,6 +13,7 @@ public class GlobalExceptionHandler {
             TaskNotFoundException.class,
             UserNotFoundException.class
     })
+
     public ResponseEntity<Object> handleNotFoundException(RuntimeException e) {
         ExceptionTemplate exceptionResponse = new ExceptionTemplate(e.getMessage(), HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
@@ -22,7 +23,8 @@ public class GlobalExceptionHandler {
             TaskBadDataException.class,
             UserBadDataException.class,
             ReleaseBadDataException.class,
-            ProjectBadDataException.class
+            ProjectBadDataException.class,
+            WrongFileTypeException.class
     })
     public ResponseEntity<Object> handleBadDataException(RuntimeException e) {
         ExceptionTemplate exceptionResponse = new ExceptionTemplate(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -31,6 +33,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {ProjectClosingException.class, ReleaseClosingException.class})
     public ResponseEntity<Object> handleClosingException(RuntimeException e) {
+        ExceptionTemplate exceptionResponse = new ExceptionTemplate(e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = CSVParsingException.class)
+    public ResponseEntity<Object> handleCSVParsingException(RuntimeException e) {
         ExceptionTemplate exceptionResponse = new ExceptionTemplate(e.getMessage(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }

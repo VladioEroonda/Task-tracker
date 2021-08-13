@@ -1,5 +1,14 @@
 package com.github.vladioeroonda.tasktracker.model;
 
-public enum Role {
+import org.springframework.security.core.GrantedAuthority;
+
+import java.io.Serializable;
+
+public enum Role implements GrantedAuthority, Serializable {
     USER, ADMIN;
+
+    @Override
+    public String getAuthority() {
+        return name();
+    }
 }

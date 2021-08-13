@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "release", schema = "public")
-public class Release {
+public class Release implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -115,5 +116,15 @@ public class Release {
     @Override
     public int hashCode() {
         return Objects.hash(id, version, startTime, finishTime, tasks);
+    }
+
+    @Override
+    public String toString() {
+        return "Release{" +
+                "id=" + id +
+                ", version='" + version + '\'' +
+                ", startTime=" + startTime +
+                ", finishTime=" + finishTime +
+                '}';
     }
 }

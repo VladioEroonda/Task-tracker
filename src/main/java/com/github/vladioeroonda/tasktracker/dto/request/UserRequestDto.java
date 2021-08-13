@@ -11,6 +11,8 @@ public class UserRequestDto {
     private Long id;
     @Schema(description = "Логин Пользователя")
     private String login;
+    @Schema(description = "Пароль Пользователя")
+    private String password;
     @Schema(description = "ФИО Пользователя")
     private String name;
     @Schema(description = "Роли Пользователя")
@@ -19,14 +21,15 @@ public class UserRequestDto {
     public UserRequestDto() {
     }
 
-    public UserRequestDto(
-            Long id,
-            String login,
-            String name
-    ) {
+    public UserRequestDto(Long id) {
         this.id = id;
+    }
+
+    public UserRequestDto(String login, String password, String name, Set<Role> roles) {
         this.login = login;
+        this.password = password;
         this.name = name;
+        this.roles = roles;
     }
 
     public Long getId() {
@@ -59,5 +62,13 @@ public class UserRequestDto {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
