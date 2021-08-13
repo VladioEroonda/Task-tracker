@@ -13,7 +13,6 @@ public class GlobalExceptionHandler {
             TaskNotFoundException.class,
             UserNotFoundException.class
     })
-
     public ResponseEntity<Object> handleNotFoundException(RuntimeException e) {
         ExceptionTemplate exceptionResponse = new ExceptionTemplate(e.getMessage(), HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);

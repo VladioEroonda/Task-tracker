@@ -3,8 +3,11 @@ package com.github.vladioeroonda.tasktracker.controller;
 import com.github.vladioeroonda.tasktracker.dto.request.UserRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.UserResponseDto;
 import com.github.vladioeroonda.tasktracker.service.UserService;
+import com.github.vladioeroonda.tasktracker.service.impl.ProjectManagementServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tracker/user")
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
 
@@ -32,6 +36,7 @@ public class UserController {
     @Operation(summary = "Получение списка всех Пользователей")
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+        logger.info("GET /api/tracker/user");
         List<UserResponseDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
@@ -39,6 +44,7 @@ public class UserController {
     @Operation(summary = "Получение конкретного Пользователя по его id")
     @GetMapping(value = "/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
+        logger.info("GET /api/tracker/user/{id}");
         UserResponseDto user = userService.getUserByIdAndReturnResponseDto(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -46,6 +52,7 @@ public class UserController {
     @Operation(summary = "Добавление нового Пользователя")
     @PostMapping
     public ResponseEntity<UserResponseDto> addNewUser(@RequestBody UserRequestDto requestDto) {
+        logger.info("POST /api/tracker/user");
         UserResponseDto user = userService.addUser(requestDto);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
@@ -53,6 +60,7 @@ public class UserController {
     @Operation(summary = "Изменение Пользователя")
     @PutMapping
     public ResponseEntity<UserResponseDto> updateUser(@RequestBody UserRequestDto requestDto) {
+        logger.info("PUT /api/tracker/user");
         UserResponseDto user = userService.updateUser(requestDto);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -60,6 +68,7 @@ public class UserController {
     @Operation(summary = "Удаление конкретного Пользователя по его id")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
+        logger.info("DELETE /api/tracker/user/{id}");
         userService.deleteUser(id);
         return new ResponseEntity<>(
                 String.format("Пользователь с id #%d был успешно удалён", id),
