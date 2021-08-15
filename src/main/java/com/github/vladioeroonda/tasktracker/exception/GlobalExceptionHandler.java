@@ -1,9 +1,12 @@
 package com.github.vladioeroonda.tasktracker.exception;
 
+import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import javax.servlet.http.HttpServletResponse;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -39,6 +42,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = CSVParsingException.class)
     public ResponseEntity<Object> handleCSVParsingException(RuntimeException e) {
+        ExceptionTemplate exceptionResponse = new ExceptionTemplate(e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<Object> handleFeignStatusException(FeignException e, HttpServletResponse response) {
         ExceptionTemplate exceptionResponse = new ExceptionTemplate(e.getMessage(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }

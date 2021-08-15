@@ -3,6 +3,8 @@ package com.github.vladioeroonda.tasktracker.dto.response;
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.math.BigDecimal;
+
 @Schema(description = "Сущность Проекта(ответ)")
 public class ProjectResponseDto {
     @Schema(description = "Id Проекта")
@@ -13,6 +15,8 @@ public class ProjectResponseDto {
     private ProjectStatus status;
     @Schema(description = "Заказчик Проекта")
     private UserResponseDto customer;
+    @Schema(description = "Цена разработки Проекта")
+    private BigDecimal price;
 
     public ProjectResponseDto() {
     }
@@ -21,12 +25,14 @@ public class ProjectResponseDto {
             Long id,
             String name,
             ProjectStatus status,
-            UserResponseDto customer
+            UserResponseDto customer,
+            BigDecimal price
     ) {
         this.id = id;
         this.name = name;
         this.status = status;
         this.customer = customer;
+        this.price = price;
     }
 
     public Long getId() {
@@ -59,5 +65,13 @@ public class ProjectResponseDto {
 
     public void setCustomer(UserResponseDto customer) {
         this.customer = customer;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 }

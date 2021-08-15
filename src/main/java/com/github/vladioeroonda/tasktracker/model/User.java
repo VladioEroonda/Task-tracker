@@ -36,6 +36,8 @@ public class User implements UserDetails, Serializable {
     private String password;
     @Column(nullable = false)
     private String name;
+    @Column(name = "bank_account_id")
+    private String bankAccountId;
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role", schema = "public", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
@@ -44,6 +46,7 @@ public class User implements UserDetails, Serializable {
     private List<Task> tasksAsAuthor;
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, mappedBy = "executor")
     private List<Task> tasksAsExecutor;
+
 
     public User() {
     }
@@ -54,10 +57,21 @@ public class User implements UserDetails, Serializable {
         this.roles = roles;
     }
 
-    public User(Long id, String login, String name, Set<Role> roles, List<Task> tasksAsAuthor, List<Task> tasksAsExecutor) {
+    public User(
+            Long id,
+            String login,
+            String password,
+            String name,
+            String bankAccountId,
+            Set<Role> roles,
+            List<Task> tasksAsAuthor,
+            List<Task> tasksAsExecutor
+    ) {
         this.id = id;
         this.login = login;
+        this.password = password;
         this.name = name;
+        this.bankAccountId = bankAccountId;
         this.roles = roles;
         this.tasksAsAuthor = tasksAsAuthor;
         this.tasksAsExecutor = tasksAsExecutor;
@@ -111,6 +125,14 @@ public class User implements UserDetails, Serializable {
         this.tasksAsExecutor = tasksAsExecutor;
     }
 
+    public String getBankAccountId() {
+        return bankAccountId;
+    }
+
+    public void setBankAccountId(String bankAccountId) {
+        this.bankAccountId = bankAccountId;
+    }
+
     public void setPassword(String password) {
         this.password = password;
     }
@@ -155,17 +177,12 @@ public class User implements UserDetails, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) &&
-                Objects.equals(login, user.login) &&
-                Objects.equals(name, user.name) &&
-                Objects.equals(roles, user.roles) &&
-                Objects.equals(tasksAsAuthor, user.tasksAsAuthor) &&
-                Objects.equals(tasksAsExecutor, user.tasksAsExecutor);
+        return Objects.equals(id, user.id) && Objects.equals(login, user.login) && Objects.equals(password, user.password) && Objects.equals(name, user.name) && Objects.equals(bankAccountId, user.bankAccountId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, login, name, roles, tasksAsAuthor, tasksAsExecutor);
+        return Objects.hash(id, login, password, name, bankAccountId);
     }
 
     @Override
@@ -205,7 +222,7 @@ public class User implements UserDetails, Serializable {
                 ", login='" + login + '\'' +
                 ", password='" + password + '\'' +
                 ", name='" + name + '\'' +
-                ", roles=" + roles +
+                ", bankAccountId='" + bankAccountId + '\'' +
                 '}';
     }
 }

@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 
-@FeignClient(name = "payment-service", url = "${payment-service.api-url}")
+@FeignClient(name = "payment-service",
+        url = "${payment-service.api-url}")
 public interface PaymentClient {
 
     @GetMapping("/api/payment/v1/check")
@@ -16,5 +17,4 @@ public interface PaymentClient {
             @RequestParam BigDecimal amount,
             @RequestParam String comment
     );
-
 }
