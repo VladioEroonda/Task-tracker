@@ -65,7 +65,7 @@ public class ProjectController {
     @PutMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ProjectResponseDto> updateProject(@RequestBody ProjectRequestDto requestDto) {
-        logger.info("PUT /api/tracker/project");
+        logger.info("PUT /api/tracker/project/");
         ProjectResponseDto project = projectService.updateProject(requestDto);
         return new ResponseEntity<>(project, HttpStatus.OK);
     }

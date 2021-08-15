@@ -43,7 +43,7 @@ public class ReleaseManagementController {
     @PatchMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ReleaseResponseDto> closeRelease(@RequestBody ReleaseClosingRequestDto requestDto) {
-        logger.info("PATCH /api/tracker/release/management/");
+        logger.info("PATCH /api/tracker/release/management");
         ReleaseResponseDto release = releaseManagementService.closeRelease(requestDto);
         return new ResponseEntity<>(release, HttpStatus.OK);
     }
