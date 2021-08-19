@@ -3,7 +3,6 @@ package com.github.vladioeroonda.tasktracker.controller;
 import com.github.vladioeroonda.tasktracker.dto.request.UserRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.UserResponseDto;
 import com.github.vladioeroonda.tasktracker.service.UserService;
-import com.github.vladioeroonda.tasktracker.service.impl.ProjectManagementServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ public class UserController {
         logger.info("GET /api/tracker/user");
 
         List<UserResponseDto> users = userService.getAllUsers();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        return ResponseEntity.ok().body(users);
     }
 
     @Operation(summary = "Получение конкретного Пользователя по его id")
@@ -50,7 +49,7 @@ public class UserController {
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         logger.info("GET /api/tracker/user/{id}");
         UserResponseDto user = userService.getUserByIdAndReturnResponseDto(id);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return ResponseEntity.ok().body(user);
     }
 
     @Operation(summary = "Добавление нового Пользователя")
@@ -59,7 +58,7 @@ public class UserController {
     public ResponseEntity<UserResponseDto> addNewUser(@RequestBody UserRequestDto requestDto) {
         logger.info("POST /api/tracker/user");
         UserResponseDto user = userService.addUser(requestDto);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @Operation(summary = "Изменение Пользователя")
@@ -68,7 +67,7 @@ public class UserController {
     public ResponseEntity<UserResponseDto> updateUser(@RequestBody UserRequestDto requestDto) {
         logger.info("PUT /api/tracker/user");
         UserResponseDto user = userService.updateUser(requestDto);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return ResponseEntity.ok().body(user);
     }
 
     @Operation(summary = "Удаление конкретного Пользователя по его id")
@@ -77,9 +76,6 @@ public class UserController {
     public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
         logger.info("DELETE /api/tracker/user/{id}");
         userService.deleteUser(id);
-        return new ResponseEntity<>(
-                String.format("Пользователь с id #%d был успешно удалён", id),
-                HttpStatus.OK
-        );
+        return ResponseEntity.ok().body(String.format("Пользователь с id #%d был успешно удалён", id));
     }
 }

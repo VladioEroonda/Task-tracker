@@ -125,11 +125,6 @@ public class Project implements Serializable {
 
     @Override
     public String toString() {
-        return "Project{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", status=" + status +
-                ", customer=" + customer +
-                '}';
+        return String.format("Project{ id= %d, name= %s, status= %s, customer= %s}", id, name, status, customer);
     }
 }

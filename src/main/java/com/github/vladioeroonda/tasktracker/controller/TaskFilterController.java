@@ -3,13 +3,11 @@ package com.github.vladioeroonda.tasktracker.controller;
 import com.github.vladioeroonda.tasktracker.dto.response.TaskResponseDto;
 import com.github.vladioeroonda.tasktracker.model.TaskStatus;
 import com.github.vladioeroonda.tasktracker.service.TaskFilterService;
-import com.github.vladioeroonda.tasktracker.service.impl.ProjectManagementServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +46,6 @@ public class TaskFilterController {
                 name, description, status, projectName,
                 releaseVersion, authorName, executorName
         );
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return ResponseEntity.ok().body(result);
     }
 }

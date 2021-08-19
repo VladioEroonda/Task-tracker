@@ -3,7 +3,6 @@ package com.github.vladioeroonda.tasktracker.controller;
 import com.github.vladioeroonda.tasktracker.dto.request.ReleaseRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ReleaseResponseDto;
 import com.github.vladioeroonda.tasktracker.service.ReleaseService;
-import com.github.vladioeroonda.tasktracker.service.impl.ProjectManagementServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -40,7 +39,7 @@ public class ReleaseController {
     public ResponseEntity<List<ReleaseResponseDto>> getAllReleases() {
         logger.info("GET /api/tracker/release");
         List<ReleaseResponseDto> releases = releaseService.getAllReleases();
-        return new ResponseEntity<>(releases, HttpStatus.OK);
+        return ResponseEntity.ok().body(releases);
     }
 
     @Operation(summary = "Получение конкретного Релиза по его id")
@@ -49,7 +48,7 @@ public class ReleaseController {
     public ResponseEntity<ReleaseResponseDto> getReleaseById(@PathVariable Long id) {
         logger.info("GET /api/tracker/release/{id}");
         ReleaseResponseDto release = releaseService.getReleaseByIdAndReturnResponseDto(id);
-        return new ResponseEntity<>(release, HttpStatus.OK);
+        return ResponseEntity.ok().body(release);
     }
 
     @Operation(summary = "Добавление нового Релиза")
@@ -58,7 +57,7 @@ public class ReleaseController {
     public ResponseEntity<ReleaseResponseDto> addNewRelease(@RequestBody ReleaseRequestDto requestDto) {
         logger.info("POST /api/tracker/release");
         ReleaseResponseDto release = releaseService.addRelease(requestDto);
-        return new ResponseEntity<>(release, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(release);
     }
 
     @Operation(summary = "Изменение Релиза")
@@ -67,7 +66,7 @@ public class ReleaseController {
     public ResponseEntity<ReleaseResponseDto> updateRelease(@RequestBody ReleaseRequestDto requestDto) {
         logger.info("PUT /api/tracker/release");
         ReleaseResponseDto release = releaseService.updateRelease(requestDto);
-        return new ResponseEntity<>(release, HttpStatus.OK);
+        return ResponseEntity.ok().body(release);
     }
 
     @Operation(summary = "Удаление конкретного Релиза по его id")
@@ -76,9 +75,6 @@ public class ReleaseController {
     public ResponseEntity<String> deleteReleaseById(@PathVariable Long id) {
         logger.info("DELETE /api/tracker/release/{id}");
         releaseService.deleteRelease(id);
-        return new ResponseEntity<>(
-                String.format("Релиз с id #%d был успешно удалён", id),
-                HttpStatus.OK
-        );
+        return ResponseEntity.ok().body(String.format("Релиз с id #%d был успешно удалён", id));
     }
 }

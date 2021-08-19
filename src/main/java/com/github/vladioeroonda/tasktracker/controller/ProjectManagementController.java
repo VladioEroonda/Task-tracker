@@ -34,6 +34,6 @@ public class ProjectManagementController {
     public ResponseEntity<ProjectResponseDto> closeProject(@RequestBody ProjectClosingRequestDto projectClosingRequestDto) {
         logger.info("PATCH /api/tracker/project/management");
         ProjectResponseDto project = projectManagementService.closeProject(projectClosingRequestDto);
-        return new ResponseEntity<>(project, HttpStatus.OK);
+        return ResponseEntity.ok().body(project);
     }
 }
