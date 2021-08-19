@@ -10,11 +10,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
 @Table(name = "task", schema = "public")
-public class Task {
+public class Task implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -143,5 +144,11 @@ public class Task {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, description, status, project, release, author, executor);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Task{ id= %d, name= %s, description = %s, status= %s, project= %s, release= %s, author= %s, executor= %s}",
+                id, name, description, status, project, release, author, executor);
     }
 }

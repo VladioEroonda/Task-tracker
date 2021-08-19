@@ -12,13 +12,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
 @Table(name = "project", schema = "public")
-public class Project {
+public class Project implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -122,4 +123,8 @@ public class Project {
         return Objects.hash(id, name, status, customer, tasks);
     }
 
+    @Override
+    public String toString() {
+        return String.format("Project{ id= %d, name= %s, status= %s, customer= %s}", id, name, status, customer);
+    }
 }

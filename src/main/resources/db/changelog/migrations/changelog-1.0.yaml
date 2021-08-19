@@ -158,3 +158,68 @@ databaseChangeLog:
                     foreignKeyName: fk_task_executor
                     references: user(id)
                     nullable: true
+
+  - changeSet:
+      id: 000006-alter-table-user
+      author: Vlad Yushkov
+      changes:
+      - addColumn:
+          columns:
+            - column:
+                name: password
+                type: varchar(255)
+                constraints:
+                  nullable: false
+          tableName: user
+
+  - changeSet:
+      id: 000007-adding-test-users
+      author: Vlad Yushkov
+      changes:
+        - insert:
+            tableName: user
+            columns:
+              - column:
+                  name: login
+                  value: admin
+              - column:
+                  name: name
+                  value: testAdmin
+              - column:
+                  name: password
+                  value: $2a$12$ZhN2U0sHXeoLR52Nvwbb2eUlEBsmL9Cpjr4VbbD9uNYAiaF7.RwtW
+        - insert:
+            tableName: user
+            columns:
+              - column:
+                  name: login
+                  value: user
+              - column:
+                  name: name
+                  value: testUser
+              - column:
+                  name: password
+                  value: $2a$12$OZ0pajB2NUqsxze92ingQuOM7OLqbaLigUTdQ5jT2xuD0TasmKZSq
+
+  - changeSet:
+      id: 000008-adding-roles
+      author: Vlad Yushkov
+      changes:
+        - insert:
+            tableName: user_role
+            columns:
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: roles
+                  value: ADMIN
+        - insert:
+            tableName: user_role
+            columns:
+              - column:
+                  name: user_id
+                  value: 2
+              - column:
+                  name: roles
+                  value: USER

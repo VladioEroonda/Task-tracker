@@ -24,6 +24,10 @@ public class ReleaseRequestDto {
         this.startTime = startTime;
     }
 
+    public ReleaseRequestDto(Long id) {
+        this.id = id;
+    }
+
     public ReleaseRequestDto(
             Long id,
             String version,

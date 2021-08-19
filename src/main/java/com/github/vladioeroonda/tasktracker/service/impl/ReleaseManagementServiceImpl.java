@@ -58,7 +58,7 @@ public class ReleaseManagementServiceImpl implements ReleaseManagementService {
 
         if (
                 (requestDto.getFinishTime() != null && release.getStartTime() != null) &&
-        (requestDto.getFinishTime().isBefore(release.getStartTime()))
+                        (requestDto.getFinishTime().isBefore(release.getStartTime()))
         ) {
             ReleaseClosingException exception =
                     new ReleaseClosingException("Указанное время завершения Релиза раньше его начала");
@@ -67,11 +67,7 @@ public class ReleaseManagementServiceImpl implements ReleaseManagementService {
         }
 
         release.setFinishTime(requestDto.getFinishTime());
-//        Release saved = releaseRepository.save(release);
-
         taskService.setAllTasksCancelled(requestDto.getId());
-
-//        return convertFromEntityToResponse(saved);
         return convertFromEntityToResponse(release);
     }
 

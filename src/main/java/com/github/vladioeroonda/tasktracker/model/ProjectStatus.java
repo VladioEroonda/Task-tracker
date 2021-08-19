@@ -1,5 +1,7 @@
 package com.github.vladioeroonda.tasktracker.model;
 
-public enum ProjectStatus {
+import java.io.Serializable;
+
+public enum ProjectStatus implements Serializable {
     IN_PROGRESS, FINISHED;
 }

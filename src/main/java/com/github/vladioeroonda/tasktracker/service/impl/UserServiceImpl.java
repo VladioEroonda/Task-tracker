@@ -4,30 +4,36 @@ import com.github.vladioeroonda.tasktracker.dto.request.UserRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.UserResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.UserBadDataException;
 import com.github.vladioeroonda.tasktracker.exception.UserNotFoundException;
-import com.github.vladioeroonda.tasktracker.model.Role;
 import com.github.vladioeroonda.tasktracker.model.User;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
+    public UserServiceImpl(
+            UserRepository userRepository,
+            ModelMapper modelMapper,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -92,7 +98,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto addUser(UserRequestDto userRequestDto) {
         logger.info("Добавление Пользователя");
 
-        if (userRepository.getUserByLogin(userRequestDto.getLogin()).isPresent()) {
+        if (userRepository.findUserByLoginIgnoreCase(userRequestDto.getLogin()).isPresent()) {
             UserBadDataException exception =
                     new UserBadDataException("Пользователь с таким логином уже существует");
             logger.error(exception.getMessage(), exception);
@@ -100,8 +106,8 @@ public class UserServiceImpl implements UserService {
         }
 
         User userForSave = convertFromRequestToEntity(userRequestDto);
+        userForSave.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
         userForSave.setId(null);
-        userForSave.setRoles(Set.of(Role.USER));
 
         User savedUser = userRepository.save(userForSave);
         return convertFromEntityToResponse(savedUser);
@@ -126,7 +132,7 @@ public class UserServiceImpl implements UserService {
                     throw exception;
                 });
 
-        if (userFromDB.getLogin().equals(userRequestDto.getLogin())) {
+        if (userFromDB.getLogin().equalsIgnoreCase(userRequestDto.getLogin())) {
             UserBadDataException exception =
                     new UserBadDataException("Пользователь с таким логином уже существует");
             logger.error(exception.getMessage(), exception);
@@ -165,5 +171,19 @@ public class UserServiceImpl implements UserService {
 
     private UserResponseDto convertFromEntityToResponse(User user) {
         return modelMapper.map(user, UserResponseDto.class);
+    }
+
+    @Transactional
+    @Override
+    public UserDetails loadUserByUsername(String login) {
+        return userRepository
+                .getUserByLogin(login)
+                .orElseThrow(() -> {
+                    UserNotFoundException exception = new UserNotFoundException(
+                            String.format("Пользователь с логином #%s не существует. Вход невозможен", login)
+                    );
+                    logger.error(exception.getMessage(), exception);
+                    throw exception;
+                });
     }
 }
