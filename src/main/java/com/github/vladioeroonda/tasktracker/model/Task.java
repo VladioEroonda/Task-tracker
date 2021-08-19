@@ -148,15 +148,7 @@ public class Task implements Serializable {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                ", project=" + project +
-                ", release=" + release +
-                ", author=" + author +
-                ", executor=" + executor +
-                '}';
+        return String.format("Task{ id= %d, name= %s, description = %s, status= %s, project= %s, release= %s, author= %s, executor= %s}",
+                id, name, description, status, project, release, author, executor);
     }
 }
