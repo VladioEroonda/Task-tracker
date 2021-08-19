@@ -84,7 +84,6 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
         }
 
         projectFromBD.setStatus(ProjectStatus.FINISHED);
-        projectRepository.save(projectFromBD);
 
         return convertFromEntityToResponse(projectFromBD);
     }

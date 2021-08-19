@@ -64,11 +64,10 @@ public class ReleaseManagementServiceImpl implements ReleaseManagementService {
         }
 
         release.setFinishTime(requestDto.getFinishTime());
-        Release saved = releaseRepository.save(release);
 
         taskService.setAllTasksCancelled(requestDto.getId());
 
-        return convertFromEntityToResponse(saved);
+        return convertFromEntityToResponse(release);
     }
 
     private ReleaseResponseDto convertFromEntityToResponse(Release release) {
