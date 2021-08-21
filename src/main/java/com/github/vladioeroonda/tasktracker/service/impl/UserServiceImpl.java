@@ -7,6 +7,7 @@ import com.github.vladioeroonda.tasktracker.exception.UserNotFoundException;
 import com.github.vladioeroonda.tasktracker.model.User;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.UserService;
+import com.github.vladioeroonda.tasktracker.util.Translator;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .findById(id)
                 .orElseThrow(() -> {
                     UserNotFoundException exception =
-                            new UserNotFoundException(String.format("Пользователь с id #%d не существует", id));
+                            new UserNotFoundException(String.format(Translator.toLocale("exception.user.not-found-by-id"), id));
                     logger.error(exception.getMessage(), exception);
                     throw exception;
                 });
@@ -74,7 +75,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .findById(id)
                 .orElseThrow(() -> {
                     UserNotFoundException exception =
-                            new UserNotFoundException(String.format("Пользователь с id #%d не существует", id));
+                            new UserNotFoundException(String.format(Translator.toLocale("exception.user.not-found-by-id"), id));
                     logger.error(exception.getMessage(), exception);
                     throw exception;
                 });
@@ -87,7 +88,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         if (userRepository.findById(id).isEmpty()) {
             UserNotFoundException exception =
-                    new UserNotFoundException(String.format("Пользователь с id #%d не существует.", id));
+                    new UserNotFoundException(String.format(Translator.toLocale("exception.user.not-found-by-id"), id));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -100,7 +101,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         if (userRepository.findUserByLoginIgnoreCase(userRequestDto.getLogin()).isPresent()) {
             UserBadDataException exception =
-                    new UserBadDataException("Пользователь с таким логином уже существует");
+                    new UserBadDataException(Translator.toLocale("exception.user.bad-data.login-already-exist"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -124,7 +125,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                     UserNotFoundException exception =
                             new UserNotFoundException(
                                     String.format(
-                                            "Пользователь с id #%d не существует",
+                                            Translator.toLocale("exception.user.not-found-by-id"),
                                             userRequestDto.getId()
                                     )
                             );
@@ -134,7 +135,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         if (userFromDB.getLogin().equalsIgnoreCase(userRequestDto.getLogin())) {
             UserBadDataException exception =
-                    new UserBadDataException("Пользователь с таким логином уже существует");
+                    new UserBadDataException(Translator.toLocale("exception.user.bad-data.login-already-exist"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -156,7 +157,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .findById(id)
                 .orElseThrow(() -> {
                     UserNotFoundException exception = new UserNotFoundException(
-                            String.format("Пользователь с id #%d не существует. Удаление невозможно", id)
+                            String.format(Translator.toLocale("exception.user.not-found-by-id"), id)
                     );
                     logger.error(exception.getMessage(), exception);
                     throw exception;
@@ -180,7 +181,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .getUserByLogin(login)
                 .orElseThrow(() -> {
                     UserNotFoundException exception = new UserNotFoundException(
-                            String.format("Пользователь с логином #%s не существует. Вход невозможен", login)
+                            String.format(Translator.toLocale("exception.user.not-found-by-login"), login)
                     );
                     logger.error(exception.getMessage(), exception);
                     throw exception;

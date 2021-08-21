@@ -10,6 +10,7 @@ import com.github.vladioeroonda.tasktracker.service.ProjectService;
 import com.github.vladioeroonda.tasktracker.service.ReleaseService;
 import com.github.vladioeroonda.tasktracker.service.TaskManagementService;
 import com.github.vladioeroonda.tasktracker.service.UserService;
+import com.github.vladioeroonda.tasktracker.util.Translator;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
         if (taskRequestDto.getName().length() < minNameLength) {
             TaskBadDataException exception =
                     new TaskBadDataException(
-                            String.format("Слишком короткое имя Задачи. Должно быть длиннее %d символов", minNameLength)
+                            String.format(Translator.toLocale("exception.task.too-short-task-name"), minNameLength)
                     );
             logger.error(exception.getMessage(), exception);
             throw exception;
@@ -65,7 +66,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
         if (taskRequestDto.getDescription().length() < minDescriptionLength) {
             TaskBadDataException exception =
                     new TaskBadDataException(
-                            String.format("Слишком короткое описание Задачи. Должно быть длиннее %d символов", minDescriptionLength)
+                            String.format(Translator.toLocale("exception.task.too-short-task-description"), minDescriptionLength)
                     );
             logger.error(exception.getMessage(), exception);
             throw exception;
@@ -74,7 +75,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
         if (!taskRequestDto.getStatus().equals(TaskStatus.BACKLOG) && taskRequestDto.getExecutor() == null) {
             TaskBadDataException exception =
                     new TaskBadDataException(String.format(
-                            "Задаче id #%d со статусом отличным от %s не назначен Исполнитель", taskRequestDto.getId(), TaskStatus.BACKLOG)
+                            Translator.toLocale("exception.task-management.task-with-id-has-no-executor"), taskRequestDto.getId(), TaskStatus.BACKLOG)
                     );
             logger.error(exception.getMessage(), exception);
             throw exception;

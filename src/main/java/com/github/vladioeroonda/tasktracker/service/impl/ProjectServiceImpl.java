@@ -11,6 +11,7 @@ import com.github.vladioeroonda.tasktracker.model.User;
 import com.github.vladioeroonda.tasktracker.repository.ProjectRepository;
 import com.github.vladioeroonda.tasktracker.service.ProjectService;
 import com.github.vladioeroonda.tasktracker.service.UserService;
+import com.github.vladioeroonda.tasktracker.util.Translator;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .findById(id)
                 .orElseThrow(() -> {
                     ProjectNotFoundException exception =
-                            new ProjectNotFoundException(String.format("Проект с id #%d не существует", id));
+                            new ProjectNotFoundException(String.format(Translator.toLocale("exception.project.not-found-by-id"), id));
                     logger.error(exception.getMessage(), exception);
                     return exception;
                 });
@@ -81,7 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .findById(id)
                 .orElseThrow(() -> {
                     ProjectNotFoundException exception =
-                            new ProjectNotFoundException(String.format("Проект с id #%d не существует", id));
+                            new ProjectNotFoundException(String.format(Translator.toLocale("exception.project.not-found-by-id"), id));
                     logger.error(exception.getMessage(), exception);
                     return exception;
                 });
@@ -92,7 +93,7 @@ public class ProjectServiceImpl implements ProjectService {
     public void checkProjectExistsById(Long id) {
         if (projectRepository.findById(id).isEmpty()) {
             ProjectNotFoundException exception =
-                    new ProjectNotFoundException(String.format("Проект с id #%d не существует", id));
+                    new ProjectNotFoundException(String.format(Translator.toLocale("exception.project.not-found-by-id"), id));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -107,7 +108,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         if (customer.getBankAccountId() == null) {
             ProjectBadDataException exception =
-                    new ProjectBadDataException("У Заказчика отсутствуют данные о банковском счёте. Создание проекта невозможно.");
+                    new ProjectBadDataException(Translator.toLocale("exception.project.bad-data.not-found-customer-bank-account-id"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -123,11 +124,10 @@ public class ProjectServiceImpl implements ProjectService {
                 projectRequestDto.getPrice(),
                 projectRequestDto.getName());
         logger.info("inf isPaid:", isPaid);
-        logger.debug("deb isPaid:", isPaid);
 
         if (!isPaid) {
             ProjectBadDataException exception =
-                    new ProjectBadDataException("За данный проект оплаты не поступало. Создание проекта невозможно.");
+                    new ProjectBadDataException(Translator.toLocale("exception.project.bad-data.not-found-payment-info"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -143,7 +143,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         if (projectRequestDto.getStatus() == ProjectStatus.FINISHED) {
             ProjectBadDataException exception =
-                    new ProjectBadDataException("Недопустимый статус задачи");
+                    new ProjectBadDataException(Translator.toLocale("exception.project.bad-data.wrong-status"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -153,7 +153,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> {
                     ProjectNotFoundException exception =
                             new ProjectNotFoundException(
-                                    String.format("Проект с id #%d не существует. Обновление невозможно", projectRequestDto.getId())
+                                    String.format(Translator.toLocale("exception.project.not-found-by-id"), projectRequestDto.getId())
                             );
                     logger.error(exception.getMessage(), exception);
                     return exception;
@@ -178,7 +178,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .findById(id)
                 .orElseThrow(() -> {
                     ProjectNotFoundException exception =
-                            new ProjectNotFoundException(String.format("Проект с id #%d не существует. Удаление невозможно", id));
+                            new ProjectNotFoundException(String.format(Translator.toLocale("exception.project.not-found-by-id"), id));
                     logger.error(exception.getMessage(), exception);
                     return exception;
                 });

@@ -8,6 +8,7 @@ import com.github.vladioeroonda.tasktracker.model.Release;
 import com.github.vladioeroonda.tasktracker.repository.ReleaseRepository;
 import com.github.vladioeroonda.tasktracker.service.ReleaseManagementService;
 import com.github.vladioeroonda.tasktracker.service.TaskService;
+import com.github.vladioeroonda.tasktracker.util.Translator;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class ReleaseManagementServiceImpl implements ReleaseManagementService {
 
         if (!releaseRepository.existsById(id)) {
             ReleaseNotFoundException exception =
-                    new ReleaseNotFoundException(String.format("Релиз с id #%s не найден", id));
+                    new ReleaseNotFoundException(String.format(Translator.toLocale("exception.release.not-found-by-id"), id));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -51,14 +52,14 @@ public class ReleaseManagementServiceImpl implements ReleaseManagementService {
                 .findById(requestDto.getId())
                 .orElseThrow(() -> {
                     ReleaseNotFoundException exception =
-                            new ReleaseNotFoundException(String.format("Релиз с id #%d не существует.", requestDto.getId()));
+                            new ReleaseNotFoundException(String.format(Translator.toLocale("exception.release.not-found-by-id"), requestDto.getId()));
                     logger.error(exception.getMessage(), exception);
                     return exception;
                 });
 
         if (requestDto.getFinishTime().isBefore(release.getStartTime())) {
             ReleaseClosingException exception =
-                    new ReleaseClosingException("Указанное время завершения Релиза раньше его начала");
+                    new ReleaseClosingException(Translator.toLocale("exception.release-management.wrong-closing-time"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }

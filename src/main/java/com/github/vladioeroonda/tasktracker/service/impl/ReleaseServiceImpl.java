@@ -8,6 +8,7 @@ import com.github.vladioeroonda.tasktracker.model.Release;
 import com.github.vladioeroonda.tasktracker.repository.ReleaseRepository;
 import com.github.vladioeroonda.tasktracker.service.ProjectService;
 import com.github.vladioeroonda.tasktracker.service.ReleaseService;
+import com.github.vladioeroonda.tasktracker.util.Translator;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ public class ReleaseServiceImpl implements ReleaseService {
                 .findById(id)
                 .orElseThrow(() -> {
                     ReleaseNotFoundException exception =
-                            new ReleaseNotFoundException(String.format("Релиз с id #%d не существует", id));
+                            new ReleaseNotFoundException(String.format(Translator.toLocale("exception.release.not-found-by-id"), id));
                     logger.error(exception.getMessage(), exception);
                     return exception;
                 });
@@ -72,7 +73,7 @@ public class ReleaseServiceImpl implements ReleaseService {
                 .findById(id)
                 .orElseThrow(() -> {
                     ReleaseNotFoundException exception =
-                            new ReleaseNotFoundException(String.format("Релиз с id #%d не существует", id));
+                            new ReleaseNotFoundException(String.format(Translator.toLocale("exception.release.not-found-by-id"), id));
                     logger.error(exception.getMessage(), exception);
                     return exception;
                 });
@@ -83,7 +84,7 @@ public class ReleaseServiceImpl implements ReleaseService {
     public void checkReleaseExistsById(Long id) {
         if (releaseRepository.findById(id).isEmpty()) {
             ReleaseNotFoundException exception =
-                    new ReleaseNotFoundException(String.format("Релиз с id #%d не существует", id));
+                    new ReleaseNotFoundException(String.format(Translator.toLocale("exception.release.not-found-by-id"), id));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -113,7 +114,7 @@ public class ReleaseServiceImpl implements ReleaseService {
                 .orElseThrow(() -> {
                     ReleaseNotFoundException exception =
                             new ReleaseNotFoundException(
-                                    String.format("Релиз с id #%d не существует. Обновление невозможно", releaseRequestDto.getId())
+                                    String.format(Translator.toLocale("exception.release.not-found-by-id"), releaseRequestDto.getId())
                             );
                     logger.error(exception.getMessage(), exception);
                     return exception;
@@ -121,7 +122,7 @@ public class ReleaseServiceImpl implements ReleaseService {
 
         if (releaseRequestDto.getFinishTime() != null) {
             ReleaseBadDataException exception =
-                    new ReleaseBadDataException("Закрытие Релиза возможно только через эндпоинт Управления");
+                    new ReleaseBadDataException(Translator.toLocale("exception.release.unable-to-close-here"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -143,7 +144,7 @@ public class ReleaseServiceImpl implements ReleaseService {
                 .findById(id)
                 .orElseThrow(() -> {
                     ReleaseNotFoundException exception =
-                            new ReleaseNotFoundException(String.format("Релиз с id #%d не существует. Удаление невозможно", id));
+                            new ReleaseNotFoundException(String.format(Translator.toLocale("exception.release.not-found-by-id"), id));
                     logger.error(exception.getMessage(), exception);
                     return exception;
                 });
