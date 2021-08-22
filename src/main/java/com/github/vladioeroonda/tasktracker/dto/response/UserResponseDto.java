@@ -15,6 +15,8 @@ public class UserResponseDto {
     private String name;
     @Schema(description = "Роли Пользователя")
     private Set<Role> roles;
+    @Schema(description = "Банковский счёт Пользователя")
+    private String bankAccountId;
 
     public UserResponseDto() {
     }
@@ -22,11 +24,13 @@ public class UserResponseDto {
     public UserResponseDto(
             Long id,
             String login,
-            String name
+            String name,
+            String bankAccountId
     ) {
         this.id = id;
         this.login = login;
         this.name = name;
+        this.bankAccountId = bankAccountId;
     }
 
     public Long getId() {
@@ -59,5 +63,13 @@ public class UserResponseDto {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public String getBankAccountId() {
+        return bankAccountId;
+    }
+
+    public void setBankAccountId(String bankAccountId) {
+        this.bankAccountId = bankAccountId;
     }
 }

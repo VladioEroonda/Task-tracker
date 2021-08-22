@@ -17,6 +17,8 @@ public class UserRequestDto {
     private String name;
     @Schema(description = "Роли Пользователя")
     private Set<Role> roles;
+    @Schema(description = "Банковский счёт Пользователя")
+    private String bankAccountId;
 
     public UserRequestDto() {
     }
@@ -25,11 +27,20 @@ public class UserRequestDto {
         this.id = id;
     }
 
-    public UserRequestDto(String login, String password, String name, Set<Role> roles) {
+    public UserRequestDto(
+            Long id,
+            String login,
+            String password,
+            String name,
+            Set<Role> roles,
+            String bankAccountId
+    ) {
+        this.id = id;
         this.login = login;
         this.password = password;
         this.name = name;
         this.roles = roles;
+        this.bankAccountId = bankAccountId;
     }
 
     public Long getId() {
@@ -70,5 +81,13 @@ public class UserRequestDto {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getBankAccountId() {
+        return bankAccountId;
+    }
+
+    public void setBankAccountId(String bankAccountId) {
+        this.bankAccountId = bankAccountId;
     }
 }

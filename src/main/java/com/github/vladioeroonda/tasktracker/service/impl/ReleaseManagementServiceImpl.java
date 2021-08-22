@@ -67,6 +67,7 @@ public class ReleaseManagementServiceImpl implements ReleaseManagementService {
         }
 
         release.setFinishTime(requestDto.getFinishTime());
+
         taskService.setAllTasksCancelled(requestDto.getId());
         return convertFromEntityToResponse(release);
     }

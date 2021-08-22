@@ -4,6 +4,7 @@ import com.github.vladioeroonda.tasktracker.dto.request.ProjectRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ProjectResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.ProjectBadDataException;
 import com.github.vladioeroonda.tasktracker.exception.ProjectNotFoundException;
+import com.github.vladioeroonda.tasktracker.feign.PaymentClient;
 import com.github.vladioeroonda.tasktracker.model.Project;
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
 import com.github.vladioeroonda.tasktracker.model.User;
@@ -13,10 +14,12 @@ import com.github.vladioeroonda.tasktracker.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,15 +29,21 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final UserService userService;
     private final ModelMapper modelMapper;
+    private final PaymentClient paymentClient;
+
+    @Value("${payment-service.developer-account-id}")
+    private String devAccountId;
 
     public ProjectServiceImpl(
             ProjectRepository projectRepository,
             UserService userService,
-            ModelMapper modelMapper
+            ModelMapper modelMapper,
+            PaymentClient paymentClient
     ) {
         this.projectRepository = projectRepository;
         this.userService = userService;
         this.modelMapper = modelMapper;
+        this.paymentClient = paymentClient;
     }
 
     @Transactional
@@ -95,12 +104,41 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponseDto addProject(ProjectRequestDto projectRequestDto) {
         logger.info("Добавление нового Проекта");
 
+        if (Objects.isNull(projectRequestDto.getCustomer())) {
+            ProjectBadDataException exception =
+                    new ProjectBadDataException("Не указан Заказчик");
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
+
+        User customer = userService.getUserByIdAndReturnEntity(projectRequestDto.getCustomer().getId());
+
+        if (customer.getBankAccountId() == null) {
+            ProjectBadDataException exception =
+                    new ProjectBadDataException("У Заказчика отсутствуют данные о банковском счёте. Создание проекта невозможно.");
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
+
         Project projectForSave = convertFromRequestToEntity(projectRequestDto);
         projectForSave.setId(null);
         projectForSave.setStatus(ProjectStatus.IN_PROGRESS);
-
-        User customer = userService.getUserByIdAndReturnEntity(projectRequestDto.getCustomer().getId());
         projectForSave.setCustomer(customer);
+
+        boolean isPaid = paymentClient.getPaymentCheckResult(
+                projectForSave.getCustomer().getBankAccountId(),
+                devAccountId,
+                projectRequestDto.getPrice(),
+                projectRequestDto.getName());
+        logger.info("inf isPaid:", isPaid);
+        logger.debug("deb isPaid:", isPaid);
+
+        if (!isPaid) {
+            ProjectBadDataException exception =
+                    new ProjectBadDataException("За данный проект оплаты не поступало. Создание проекта невозможно.");
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
 
         Project savedProject = projectRepository.save(projectForSave);
         return convertFromEntityToResponse(savedProject);

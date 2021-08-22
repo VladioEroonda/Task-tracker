@@ -223,3 +223,29 @@ databaseChangeLog:
               - column:
                   name: roles
                   value: USER
+
+  - changeSet:
+      id: 000009-alter-table-project
+      author: Vlad Yushkov
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: price
+                  type: NUMERIC(19,2)
+                  constraints:
+                    nullable: false
+            tableName: project
+
+  - changeSet:
+      id: 000010-alter-table-user
+      author: Vlad Yushkov
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: bank_account_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+            tableName: user
