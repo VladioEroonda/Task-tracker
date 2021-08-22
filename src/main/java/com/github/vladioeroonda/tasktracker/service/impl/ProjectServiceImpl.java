@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -102,6 +103,13 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponseDto addProject(ProjectRequestDto projectRequestDto) {
         logger.info("Добавление нового Проекта");
+
+        if (Objects.isNull(projectRequestDto.getCustomer())) {
+            ProjectBadDataException exception =
+                    new ProjectBadDataException("Не указан Заказчик");
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
 
         User customer = userService.getUserByIdAndReturnEntity(projectRequestDto.getCustomer().getId());
 
