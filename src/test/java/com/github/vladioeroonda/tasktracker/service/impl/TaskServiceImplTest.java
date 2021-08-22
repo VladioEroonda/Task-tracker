@@ -73,8 +73,8 @@ class TaskServiceImplTest {
 
         assertTrue(actual.size() >= 2);
 
-        deleteTaskById(expectedTaskId1);
-        deleteTaskById(expectedTaskId2);
+        deleteTaskAndSubEntitiesById(expectedTaskId1);
+        deleteTaskAndSubEntitiesById(expectedTaskId2);
     }
 
     @Test
@@ -87,7 +87,7 @@ class TaskServiceImplTest {
         assertNotNull(actual);
         assertEquals(expectedTaskId, actual.getId());
 
-        deleteTaskById(expectedTaskId);
+        deleteTaskAndSubEntitiesById(expectedTaskId);
     }
 
     @Test
@@ -99,7 +99,7 @@ class TaskServiceImplTest {
             taskService.getTaskByIdAndReturnResponseDto(expectedTaskId + UNREACHABLE_ID);
         });
 
-        deleteTaskById(expectedTaskId);
+        deleteTaskAndSubEntitiesById(expectedTaskId);
     }
 
     @Test
@@ -112,7 +112,7 @@ class TaskServiceImplTest {
         assertNotNull(actual);
         assertEquals(expectedTaskId, actual.getId());
 
-        deleteTaskById(expectedTaskId);
+        deleteTaskAndSubEntitiesById(expectedTaskId);
     }
 
     @Test
@@ -124,7 +124,7 @@ class TaskServiceImplTest {
             taskService.getTaskByIdAndReturnEntity(expectedTaskId + UNREACHABLE_ID);
         });
 
-        deleteTaskById(expectedTaskId);
+        deleteTaskAndSubEntitiesById(expectedTaskId);
     }
 
     @Test
@@ -134,7 +134,7 @@ class TaskServiceImplTest {
 
         taskService.checkTaskExistsById(expectedTaskId);
 
-        deleteTaskById(expectedTaskId);
+        deleteTaskAndSubEntitiesById(expectedTaskId);
     }
 
 
@@ -147,7 +147,7 @@ class TaskServiceImplTest {
             taskService.checkTaskExistsById(expectedTaskId + UNREACHABLE_ID);
         });
 
-        deleteTaskById(expectedTaskId);
+        deleteTaskAndSubEntitiesById(expectedTaskId);
     }
 
     @Test
@@ -166,7 +166,7 @@ class TaskServiceImplTest {
         assertEquals(expectedTask.getDescription(), actual.getDescription());
         assertEquals(TaskStatus.BACKLOG, actual.getStatus());
 
-        deleteTaskById(existingTask.getId());
+        deleteTaskAndSubEntitiesById(existingTask.getId());
     }
 
     @Test
@@ -183,7 +183,7 @@ class TaskServiceImplTest {
             taskService.addTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        deleteTaskAndSubEntitiesById(existingTask.getId());
     }
 
     @Test
@@ -200,7 +200,7 @@ class TaskServiceImplTest {
             taskService.addTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        deleteTaskAndSubEntitiesById(existingTask.getId());
     }
 
     @Test
@@ -217,7 +217,7 @@ class TaskServiceImplTest {
             taskService.addTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        deleteTaskAndSubEntitiesById(existingTask.getId());
     }
 
     @Test
@@ -234,7 +234,7 @@ class TaskServiceImplTest {
             taskService.addTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        deleteTaskAndSubEntitiesById(existingTask.getId());
     }
 
     @Test
@@ -252,7 +252,7 @@ class TaskServiceImplTest {
         assertTrue(actual.size() == 1);
 
         for (int i = 0; i < actual.size(); i++) {
-            deleteTaskById(actual.get(i).getId());
+            deleteOnlyTaskById(actual.get(i).getId());
         }
     }
 
@@ -263,7 +263,7 @@ class TaskServiceImplTest {
 
         taskService.deleteTask(expectedTaskId);
 
-        deleteTaskById(expectedTaskId);
+        deleteTaskAndSubEntitiesById(expectedTaskId);
     }
 
     @Test
@@ -275,7 +275,7 @@ class TaskServiceImplTest {
             taskService.deleteTask(expectedTaskId + UNREACHABLE_ID);
         });
 
-        deleteTaskById(expectedTaskId);
+        deleteTaskAndSubEntitiesById(expectedTaskId);
     }
 
     @Test
@@ -287,7 +287,7 @@ class TaskServiceImplTest {
 
         assertEquals(1, actual);
 
-        deleteTaskById(expectedTask.getId());
+        deleteTaskAndSubEntitiesById(expectedTask.getId());
     }
 
     @Test
@@ -298,7 +298,7 @@ class TaskServiceImplTest {
 
         assertEquals(0, actual);
 
-        deleteTaskById(expectedTask.getId());
+        deleteTaskAndSubEntitiesById(expectedTask.getId());
     }
 
     @Test
@@ -311,7 +311,7 @@ class TaskServiceImplTest {
 
         assertEquals(TaskStatus.CANCELLED, actual);
 
-        deleteTaskById(expectedTask.getId());
+        deleteTaskAndSubEntitiesById(expectedTask.getId());
     }
 
     @Test
@@ -322,7 +322,7 @@ class TaskServiceImplTest {
             taskService.setAllTasksCancelled(expectedTask.getRelease().getId() + UNREACHABLE_ID);
         });
 
-        deleteTaskById(expectedTask.getId());
+        deleteTaskAndSubEntitiesById(expectedTask.getId());
     }
 
     private TaskRequestDto returnFormedTaskDto(String name, String description, ProjectRequestDto project, ReleaseRequestDto release, UserRequestDto author, UserRequestDto executor) {
@@ -376,12 +376,20 @@ class TaskServiceImplTest {
         return taskRepository.save(taskForSave);
     }
 
-    private void deleteTaskById(long taskId) {
+    private void deleteTaskAndSubEntitiesById(long taskId) {
         taskRepository.findById(taskId).ifPresent(
                 (task -> {
                     projectRepository.delete(projectRepository.getById(task.getProject().getId()));
                     releaseRepository.delete(releaseRepository.getById(task.getRelease().getId()));
                     userRepository.delete(userRepository.getById(task.getAuthor().getId()));
+                    taskRepository.delete(task);
+                })
+        );
+    }
+
+    private void deleteOnlyTaskById(long taskId) {
+        taskRepository.findById(taskId).ifPresent(
+                (task -> {
                     taskRepository.delete(task);
                 })
         );
