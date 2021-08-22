@@ -5,6 +5,8 @@ import com.github.vladioeroonda.tasktracker.dto.response.ProjectResponseDto;
 import com.github.vladioeroonda.tasktracker.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tracker/project")
 public class ProjectController {
+    private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
     private final ProjectService projectService;
 
@@ -34,42 +37,44 @@ public class ProjectController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<List<ProjectResponseDto>> getAllProjects() {
+        logger.info("GET /api/tracker/project");
         List<ProjectResponseDto> projects = projectService.getAllProjects();
-        return new ResponseEntity<>(projects, HttpStatus.OK);
+        return ResponseEntity.ok().body(projects);
     }
 
     @Operation(summary = "Получение конкретного Проекта по его id")
     @GetMapping(value = "/{id}")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable Long id) {
+        logger.info("GET /api/tracker/project/{id}");
         ProjectResponseDto project = projectService.getProjectByIdAndReturnResponseDto(id);
-        return new ResponseEntity<>(project, HttpStatus.OK);
+        return ResponseEntity.ok().body(project);
     }
 
     @Operation(summary = "Добавление нового Проекта")
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ProjectResponseDto> addNewProject(@RequestBody ProjectRequestDto requestDto) {
+        logger.info("POST /api/tracker/project");
         ProjectResponseDto project = projectService.addProject(requestDto);
-        return new ResponseEntity<>(project, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(project);
     }
 
     @Operation(summary = "Изменение Проекта")
     @PutMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ProjectResponseDto> updateProject(@RequestBody ProjectRequestDto requestDto) {
+        logger.info("PUT /api/tracker/project/");
         ProjectResponseDto project = projectService.updateProject(requestDto);
-        return new ResponseEntity<>(project, HttpStatus.OK);
+        return ResponseEntity.ok().body(project);
     }
 
     @Operation(summary = "Удаление конкретного Проекта по его id")
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> deleteProjectById(@PathVariable Long id) {
+        logger.info("DELETE /api/tracker/project/{id}");
         projectService.deleteProject(id);
-        return new ResponseEntity<>(
-                String.format("Проект с id #%d был успешно удалён", id),
-                HttpStatus.OK
-        );
+        return ResponseEntity.ok().body(String.format("Проект с id #%d был успешно удалён", id));
     }
 }

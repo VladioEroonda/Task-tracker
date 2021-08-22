@@ -5,6 +5,7 @@ import com.github.vladioeroonda.tasktracker.model.Task;
 import com.github.vladioeroonda.tasktracker.model.TaskStatus;
 import com.github.vladioeroonda.tasktracker.repository.TaskRepository;
 import com.github.vladioeroonda.tasktracker.service.TaskFilterService;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class TaskFilterServiceImpl implements TaskFilterService {
         List<Task> filteredTasks = taskRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (name != null && !name.isEmpty()) {
+            if (!StringUtils.isBlank(name)) {
                 predicates.add(cb.like(root.get("name"), "%" + name + "%"));
             }
 

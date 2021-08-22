@@ -120,11 +120,6 @@ public class Release implements Serializable {
 
     @Override
     public String toString() {
-        return "Release{" +
-                "id=" + id +
-                ", version='" + version + '\'' +
-                ", startTime=" + startTime +
-                ", finishTime=" + finishTime +
-                '}';
+        return String.format("Release{ id= %d, version= %s, startTime= %s, finishTime = %s }", id, version, startTime, finishTime);
     }
 }

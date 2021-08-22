@@ -57,7 +57,10 @@ public class ReleaseManagementServiceImpl implements ReleaseManagementService {
                     return exception;
                 });
 
-        if (requestDto.getFinishTime().isBefore(release.getStartTime())) {
+        if (
+                (requestDto.getFinishTime() != null && release.getStartTime() != null) &&
+                        (requestDto.getFinishTime().isBefore(release.getStartTime()))
+        ) {
             ReleaseClosingException exception =
                     new ReleaseClosingException(Translator.toLocale("exception.release-management.wrong-closing-time"));
             logger.error(exception.getMessage(), exception);
@@ -67,7 +70,6 @@ public class ReleaseManagementServiceImpl implements ReleaseManagementService {
         release.setFinishTime(requestDto.getFinishTime());
 
         taskService.setAllTasksCancelled(requestDto.getId());
-
         return convertFromEntityToResponse(release);
     }
 
