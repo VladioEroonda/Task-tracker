@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -104,9 +105,16 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponseDto addProject(ProjectRequestDto projectRequestDto) {
         logger.info("Добавление нового Проекта");
 
+        if (Objects.isNull(projectRequestDto.getCustomer())) {
+            ProjectBadDataException exception =
+                    new ProjectBadDataException(Translator.toLocale("exception.project.bad-data.customer-is-empty"));
+            logger.error(exception.getMessage(), exception);
+            throw exception;
+        }
+
         User customer = userService.getUserByIdAndReturnEntity(projectRequestDto.getCustomer().getId());
 
-        if (customer.getBankAccountId() == null) {
+        if (Objects.isNull(customer.getBankAccountId())) {
             ProjectBadDataException exception =
                     new ProjectBadDataException(Translator.toLocale("exception.project.bad-data.not-found-customer-bank-account-id"));
             logger.error(exception.getMessage(), exception);
@@ -123,7 +131,6 @@ public class ProjectServiceImpl implements ProjectService {
                 devAccountId,
                 projectRequestDto.getPrice(),
                 projectRequestDto.getName());
-        logger.info("inf isPaid:", isPaid);
 
         if (!isPaid) {
             ProjectBadDataException exception =

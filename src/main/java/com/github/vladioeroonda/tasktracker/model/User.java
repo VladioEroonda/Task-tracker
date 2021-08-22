@@ -57,6 +57,14 @@ public class User implements UserDetails, Serializable {
         this.roles = roles;
     }
 
+    public User(String login, String password, String name, String bankAccountId, Set<Role> roles) {
+        this.login = login;
+        this.password = password;
+        this.name = name;
+        this.bankAccountId = bankAccountId;
+        this.roles = roles;
+    }
+
     public User(
             Long id,
             String login,

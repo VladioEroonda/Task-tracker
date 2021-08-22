@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -133,7 +134,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                     throw exception;
                 });
 
-        if (userFromDB.getLogin().equalsIgnoreCase(userRequestDto.getLogin())) {
+        System.out.println("servUSER " + userRequestDto);
+        System.out.println("servUSER id " + userRequestDto.getLogin());
+        System.out.println("servUSER id2 " + userFromDB.getLogin());
+
+        Optional<User> userByLogin = userRepository.getUserByLogin(userRequestDto.getLogin());
+        if (userByLogin.isPresent()) {
             UserBadDataException exception =
                     new UserBadDataException(Translator.toLocale("exception.user.bad-data.login-already-exist"));
             logger.error(exception.getMessage(), exception);

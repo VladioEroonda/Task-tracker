@@ -9,6 +9,7 @@ import com.github.vladioeroonda.tasktracker.repository.TaskRepository;
 import com.github.vladioeroonda.tasktracker.service.ProjectService;
 import com.github.vladioeroonda.tasktracker.service.ReleaseService;
 import com.github.vladioeroonda.tasktracker.service.TaskManagementService;
+import com.github.vladioeroonda.tasktracker.service.TaskService;
 import com.github.vladioeroonda.tasktracker.service.UserService;
 import com.github.vladioeroonda.tasktracker.util.Translator;
 import org.modelmapper.ModelMapper;
@@ -27,6 +28,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     @Value("${task.min-length.description}")
     private int minDescriptionLength;
 
+    private final TaskService taskService;
     private final TaskRepository taskRepository;
     private final UserService userService;
     private final ReleaseService releaseService;
@@ -34,12 +36,14 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     private final ModelMapper modelMapper;
 
     public TaskManagementServiceImpl(
+            TaskService taskService,
             TaskRepository taskRepository,
             UserService userService,
             ReleaseService releaseService,
             ProjectService projectService,
             ModelMapper modelMapper
     ) {
+        this.taskService = taskService;
         this.taskRepository = taskRepository;
         this.userService = userService;
         this.releaseService = releaseService;
@@ -57,7 +61,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
         if (taskRequestDto.getName().length() < minNameLength) {
             TaskBadDataException exception =
                     new TaskBadDataException(
-                            String.format(Translator.toLocale("exception.task.too-short-task-name"), minNameLength)
+                            String.format(Translator.toLocale("exception.task.too-short-task-name"), taskRequestDto.getName(), minNameLength)
                     );
             logger.error(exception.getMessage(), exception);
             throw exception;
@@ -88,7 +92,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
     private void fieldsCheckForExisting(TaskRequestDto taskRequestDto) {
 
-        taskRepository.existsById(taskRequestDto.getId());
+        taskService.checkTaskExistsById(taskRequestDto.getId());
         projectService.checkProjectExistsById(taskRequestDto.getProject().getId());
         releaseService.checkReleaseExistsById(taskRequestDto.getRelease().getId());
         userService.checkUserExistsById(taskRequestDto.getAuthor().getId());
@@ -96,7 +100,6 @@ public class TaskManagementServiceImpl implements TaskManagementService {
         if (taskRequestDto.getExecutor() != null) {
             userService.checkUserExistsById(taskRequestDto.getExecutor().getId());
         }
-
     }
 
     private Task convertFromRequestToEntity(TaskRequestDto requestDto) {

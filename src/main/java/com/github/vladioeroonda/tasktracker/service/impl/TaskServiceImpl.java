@@ -176,7 +176,6 @@ public class TaskServiceImpl implements TaskService {
         }
         taskForSave.setRelease(release);
 
-
         User author =
                 userService.getUserByIdAndReturnEntity(taskRequestDto.getAuthor().getId());
         taskForSave.setAuthor(author);
@@ -262,9 +261,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Transactional
     @Override
-    public void setAllTasksCancelled(Long id) {
-        releaseService.checkReleaseExistsById(id);
-        taskRepository.setAllTasksCancelled(id);
+    public void setAllTasksCancelled(Long releaseId) {
+        releaseService.checkReleaseExistsById(releaseId);
+        taskRepository.setAllTasksCancelled(releaseId);
     }
 
     private Task convertFromRequestToEntity(TaskRequestDto requestDto) {
