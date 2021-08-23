@@ -8,21 +8,22 @@ import com.github.vladioeroonda.tasktracker.model.Project;
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
 import com.github.vladioeroonda.tasktracker.model.Release;
 import com.github.vladioeroonda.tasktracker.model.Role;
+import com.github.vladioeroonda.tasktracker.model.Task;
+import com.github.vladioeroonda.tasktracker.model.TaskStatus;
 import com.github.vladioeroonda.tasktracker.model.User;
 import com.github.vladioeroonda.tasktracker.repository.ProjectRepository;
+import com.github.vladioeroonda.tasktracker.repository.ReleaseRepository;
+import com.github.vladioeroonda.tasktracker.repository.TaskRepository;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.ProjectManagementService;
-import com.github.vladioeroonda.tasktracker.service.ReleaseService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -41,8 +42,10 @@ class ProjectManagementServiceImplTest {
     private UserRepository userRepository;
     @Autowired
     private ProjectRepository projectRepository;
-    @MockBean
-    private ReleaseService releaseService;
+    @Autowired
+    private ReleaseRepository releaseRepository;
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Test
     void closeProject() {
@@ -95,16 +98,57 @@ class ProjectManagementServiceImplTest {
 
     @Test
     void closeProject_ShouldThrowException_IfProjectHadNotFinishedReleases() {
-        ProjectClosingRequestDto expected =
-                new ProjectClosingRequestDto(returnExistingProjectId(ProjectStatus.IN_PROGRESS), ProjectStatus.FINISHED);
+        Task expectedTask = returnTaskForTestNotClosedRelease();
 
-        Mockito.when(releaseService.getAllNotClosedReleasesByProjectId(expected.getId())).thenReturn(List.of(new Release(), new Release()));
+        ProjectClosingRequestDto expected =
+                new ProjectClosingRequestDto(expectedTask.getProject().getId(), ProjectStatus.FINISHED);
+
 
         assertThrows(ProjectClosingException.class, () -> {
             projectManagementService.closeProject(expected);
         });
 
-        deleteTestProjectAndUser(expected.getId());
+        deleteAllAfterNotClosedReleaseTest(expectedTask.getId());
+    }
+
+    private Task returnTaskForTestNotClosedRelease() {
+        User user = new User(
+                UUID.randomUUID().toString(),
+                "testPassword",
+                "TestName",
+                "testBankAccountId",
+                Set.of(Role.USER)
+        );
+        userRepository.save(user);
+
+        Project project = new Project(
+                "TestName",
+                ProjectStatus.IN_PROGRESS,
+                user,
+                new BigDecimal("3000")
+        );
+        projectRepository.save(project);
+
+        Release release = new Release(
+                UUID.randomUUID().toString(),
+                LocalDateTime.now(),
+                null
+        );
+        releaseRepository.save(release);
+
+        Task taskForSave1 = new Task(null, "TestName1", "description", TaskStatus.IN_PROGRESS, project, release, user, user);
+
+        return taskRepository.save(taskForSave1);
+    }
+
+    private void deleteAllAfterNotClosedReleaseTest(long taskId) {
+        Optional<Task> taskFromBD = taskRepository.findById(taskId);
+        if (taskFromBD.isPresent()) {
+            taskRepository.delete(taskFromBD.get());
+            projectRepository.delete(taskFromBD.get().getProject());
+            releaseRepository.delete(taskFromBD.get().getRelease());
+            userRepository.delete(taskFromBD.get().getAuthor());
+        }
     }
 
     private long returnExistingProjectId(ProjectStatus status) {

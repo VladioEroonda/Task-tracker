@@ -73,6 +73,30 @@ class ProjectServiceImplTest {
     }
 
     @Test
+    void addProject_ShouldThrowException_IfCustomerIsNull() {
+        long expectedUserId = returnSavedUserId(null);
+        UserRequestDto expectedUser =
+                new UserRequestDto(
+                        expectedUserId,
+                        "TestLogin",
+                        "TestPassword",
+                        "TestName",
+                        Set.of(Role.USER),
+                        null
+                );
+        ProjectRequestDto expected =
+                new ProjectRequestDto(null, "TestProject", ProjectStatus.IN_PROGRESS, null, new BigDecimal("111.11"));
+        Mockito.when(paymentClient.getPaymentCheckResult(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(true);
+
+        assertThrows(ProjectBadDataException.class, () -> {
+            projectService.addProject(expected);
+        });
+
+        deleteUserById(expectedUserId);
+    }
+
+    @Test
     void addProject_ShouldThrowException_IfUsersBankAccountIsNull() {
         long expectedUserId = returnSavedUserId(null);
         UserRequestDto expectedUser =

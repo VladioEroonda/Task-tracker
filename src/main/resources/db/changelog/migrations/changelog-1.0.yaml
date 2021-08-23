@@ -271,7 +271,7 @@ databaseChangeLog:
                   value: 2500.00
 
   - changeSet:
-      id: 0000011-adding-test-release
+      id: 0000012-adding-test-release
       author: Vlad Yushkov
       changes:
         - insert:
