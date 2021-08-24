@@ -1,5 +1,6 @@
 package com.github.vladioeroonda.tasktracker.service.impl;
 
+import com.github.vladioeroonda.tasktracker.Util.TestUtil;
 import com.github.vladioeroonda.tasktracker.dto.request.ProjectRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.request.ReleaseRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.request.TaskRequestDto;
@@ -27,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -46,9 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@TestPropertySource(locations = "/application-test.properties")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integration-test")
+@ActiveProfiles(profiles = "test")
+@SpringBootTest
 class TaskServiceImplTest {
     private static int UNREACHABLE_ID = 100_000;
     @Autowired
@@ -61,6 +60,8 @@ class TaskServiceImplTest {
     private ReleaseRepository releaseRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TestUtil testUtil;
 
     @Test
     void getAllTasks() {
@@ -70,11 +71,10 @@ class TaskServiceImplTest {
         long expectedTaskId2 = expectedTask2.getId();
 
         List<TaskResponseDto> actual = taskService.getAllTasks();
+        testUtil.deleteTaskById(expectedTaskId1);
+        testUtil.deleteTaskById(expectedTaskId2);
 
         assertTrue(actual.size() >= 2);
-
-        deleteTaskAndSubEntitiesById(expectedTaskId1);
-        deleteTaskAndSubEntitiesById(expectedTaskId2);
     }
 
     @Test
@@ -83,11 +83,10 @@ class TaskServiceImplTest {
         long expectedTaskId = expectedTask.getId();
 
         TaskResponseDto actual = taskService.getTaskByIdAndReturnResponseDto(expectedTaskId);
+        testUtil.deleteTaskById(expectedTaskId);
 
         assertNotNull(actual);
         assertEquals(expectedTaskId, actual.getId());
-
-        deleteTaskAndSubEntitiesById(expectedTaskId);
     }
 
     @Test
@@ -99,7 +98,7 @@ class TaskServiceImplTest {
             taskService.getTaskByIdAndReturnResponseDto(expectedTaskId + UNREACHABLE_ID);
         });
 
-        deleteTaskAndSubEntitiesById(expectedTaskId);
+        testUtil.deleteTaskById(expectedTaskId);
     }
 
     @Test
@@ -108,11 +107,10 @@ class TaskServiceImplTest {
         long expectedTaskId = expectedTask.getId();
 
         Task actual = taskService.getTaskByIdAndReturnEntity(expectedTaskId);
+        testUtil.deleteTaskById(expectedTaskId);
 
         assertNotNull(actual);
         assertEquals(expectedTaskId, actual.getId());
-
-        deleteTaskAndSubEntitiesById(expectedTaskId);
     }
 
     @Test
@@ -124,7 +122,7 @@ class TaskServiceImplTest {
             taskService.getTaskByIdAndReturnEntity(expectedTaskId + UNREACHABLE_ID);
         });
 
-        deleteTaskAndSubEntitiesById(expectedTaskId);
+        testUtil.deleteTaskById(expectedTaskId);
     }
 
     @Test
@@ -134,7 +132,7 @@ class TaskServiceImplTest {
 
         taskService.checkTaskExistsById(expectedTaskId);
 
-        deleteTaskAndSubEntitiesById(expectedTaskId);
+        testUtil.deleteTaskById(expectedTaskId);
     }
 
 
@@ -147,7 +145,7 @@ class TaskServiceImplTest {
             taskService.checkTaskExistsById(expectedTaskId + UNREACHABLE_ID);
         });
 
-        deleteTaskAndSubEntitiesById(expectedTaskId);
+        testUtil.deleteTaskById(expectedTaskId);
     }
 
     @Test
@@ -160,13 +158,12 @@ class TaskServiceImplTest {
                 returnFormedTaskDto("testTaskName", "testDescription", expectedProject, expectedRelease, expectedUser, null);
 
         TaskResponseDto actual = taskService.addTask(expectedTask);
+        testUtil.deleteTaskById(existingTask.getId());
 
         assertNotNull(actual);
         assertEquals(expectedTask.getName(), actual.getName());
         assertEquals(expectedTask.getDescription(), actual.getDescription());
         assertEquals(TaskStatus.BACKLOG, actual.getStatus());
-
-        deleteTaskAndSubEntitiesById(existingTask.getId());
     }
 
     @Test
@@ -183,7 +180,7 @@ class TaskServiceImplTest {
             taskService.addTask(expectedTask);
         });
 
-        deleteTaskAndSubEntitiesById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -200,7 +197,7 @@ class TaskServiceImplTest {
             taskService.addTask(expectedTask);
         });
 
-        deleteTaskAndSubEntitiesById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -217,7 +214,7 @@ class TaskServiceImplTest {
             taskService.addTask(expectedTask);
         });
 
-        deleteTaskAndSubEntitiesById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -234,26 +231,22 @@ class TaskServiceImplTest {
             taskService.addTask(expectedTask);
         });
 
-        deleteTaskAndSubEntitiesById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
     void addTaskByCsv() {
         MultipartFile expected = csvForTest();
 
-        System.out.println(expected.getContentType());
         if (Objects.isNull(expected)) {
             throw new WrongFileTypeException("Error while file init");
         }
 
         List<TaskResponseDto> actual = taskService.addTaskByCsv(expected);
+        actual.stream().mapToLong(TaskResponseDto::getId).forEach(this::deleteOnlyTaskById);
 
         assertNotNull(actual);
-        assertTrue(actual.size() == 1);
-
-        for (int i = 0; i < actual.size(); i++) {
-            deleteOnlyTaskById(actual.get(i).getId());
-        }
+        assertEquals(1, actual.size());
     }
 
     @Test
@@ -263,7 +256,7 @@ class TaskServiceImplTest {
 
         taskService.deleteTask(expectedTaskId);
 
-        deleteTaskAndSubEntitiesById(expectedTaskId);
+        testUtil.deleteTaskById(expectedTaskId);
     }
 
     @Test
@@ -275,7 +268,7 @@ class TaskServiceImplTest {
             taskService.deleteTask(expectedTaskId + UNREACHABLE_ID);
         });
 
-        deleteTaskAndSubEntitiesById(expectedTaskId);
+        testUtil.deleteTaskById(expectedTaskId);
     }
 
     @Test
@@ -284,10 +277,9 @@ class TaskServiceImplTest {
         long expectedTaskId = expectedTask.getId();
 
         int actual = taskService.countUnfinishedTasksByReleaseId(expectedTask.getRelease().getId());
+        testUtil.deleteTaskById(expectedTask.getId());
 
         assertEquals(1, actual);
-
-        deleteTaskAndSubEntitiesById(expectedTask.getId());
     }
 
     @Test
@@ -295,10 +287,9 @@ class TaskServiceImplTest {
         Task expectedTask = returnNewTask(TaskStatus.DONE, ProjectStatus.IN_PROGRESS, null);
 
         int actual = taskService.countUnfinishedTasksByReleaseId(expectedTask.getRelease().getId());
+        testUtil.deleteTaskById(expectedTask.getId());
 
         assertEquals(0, actual);
-
-        deleteTaskAndSubEntitiesById(expectedTask.getId());
     }
 
     @Test
@@ -308,10 +299,9 @@ class TaskServiceImplTest {
         taskService.setAllTasksCancelled(expectedTask.getRelease().getId());
 
         TaskStatus actual = getTaskStatusById(expectedTask.getId());
+        testUtil.deleteTaskById(expectedTask.getId());
 
         assertEquals(TaskStatus.CANCELLED, actual);
-
-        deleteTaskAndSubEntitiesById(expectedTask.getId());
     }
 
     @Test
@@ -322,7 +312,7 @@ class TaskServiceImplTest {
             taskService.setAllTasksCancelled(expectedTask.getRelease().getId() + UNREACHABLE_ID);
         });
 
-        deleteTaskAndSubEntitiesById(expectedTask.getId());
+        testUtil.deleteTaskById(expectedTask.getId());
     }
 
     private TaskRequestDto returnFormedTaskDto(String name, String description, ProjectRequestDto project, ReleaseRequestDto release, UserRequestDto author, UserRequestDto executor) {
@@ -374,17 +364,6 @@ class TaskServiceImplTest {
         Task taskForSave = new Task("testTaskName", "testDescription", taskStatus, project, release, user);
 
         return taskRepository.save(taskForSave);
-    }
-
-    private void deleteTaskAndSubEntitiesById(long taskId) {
-        taskRepository.findById(taskId).ifPresent(
-                (task -> {
-                    projectRepository.delete(projectRepository.getById(task.getProject().getId()));
-                    releaseRepository.delete(releaseRepository.getById(task.getRelease().getId()));
-                    userRepository.delete(userRepository.getById(task.getAuthor().getId()));
-                    taskRepository.delete(task);
-                })
-        );
     }
 
     private void deleteOnlyTaskById(long taskId) {

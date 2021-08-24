@@ -1,5 +1,6 @@
 package com.github.vladioeroonda.tasktracker.service.impl;
 
+import com.github.vladioeroonda.tasktracker.Util.TestUtil;
 import com.github.vladioeroonda.tasktracker.dto.request.ProjectRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.request.ReleaseRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.request.TaskRequestDto;
@@ -26,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -37,11 +37,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@TestPropertySource(locations = "/application-test.properties")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integration-test")
+@ActiveProfiles(profiles = "test")
+@SpringBootTest
 class TaskManagementServiceImplTest {
-    private static int UNREACHABLE_ID = 100_000;
+    private static final int UNREACHABLE_ID = 100_000;
     @Autowired
     private TaskManagementService taskManagementService;
     @Autowired
@@ -52,6 +51,8 @@ class TaskManagementServiceImplTest {
     private ReleaseRepository releaseRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TestUtil testUtil;
 
     @Test
     void updateTask_ShouldBeSuccessful() {
@@ -68,12 +69,11 @@ class TaskManagementServiceImplTest {
         );
 
         TaskResponseDto actual = taskManagementService.updateTask(expectedTask);
+        testUtil.deleteTaskById(existingTask.getId());
 
         assertNotNull(actual);
         assertEquals(expectedTask.getName(), actual.getName());
         assertEquals(expectedTask.getDescription(), actual.getDescription());
-
-        deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -94,7 +94,7 @@ class TaskManagementServiceImplTest {
             taskManagementService.updateTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -115,7 +115,7 @@ class TaskManagementServiceImplTest {
             taskManagementService.updateTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -136,7 +136,7 @@ class TaskManagementServiceImplTest {
             taskManagementService.updateTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -157,7 +157,7 @@ class TaskManagementServiceImplTest {
             taskManagementService.updateTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -178,7 +178,7 @@ class TaskManagementServiceImplTest {
             taskManagementService.updateTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -199,7 +199,7 @@ class TaskManagementServiceImplTest {
             taskManagementService.updateTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -220,7 +220,7 @@ class TaskManagementServiceImplTest {
             taskManagementService.updateTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -241,7 +241,7 @@ class TaskManagementServiceImplTest {
             taskManagementService.updateTask(expectedTask);
         });
 
-        deleteTaskById(existingTask.getId());
+        testUtil.deleteTaskById(existingTask.getId());
     }
 
     private Task returnFormedTask() {
@@ -272,16 +272,5 @@ class TaskManagementServiceImplTest {
         Task taskForSave1 = new Task(null, "testTaskName", "description", TaskStatus.IN_PROGRESS, project, release, user, user);
 
         return taskRepository.save(taskForSave1);
-    }
-
-    private void deleteTaskById(long taskId) {
-        taskRepository.findById(taskId).ifPresent(
-                (task -> {
-                    projectRepository.delete(projectRepository.getById(task.getProject().getId()));
-                    releaseRepository.delete(releaseRepository.getById(task.getRelease().getId()));
-                    userRepository.delete(userRepository.getById(task.getAuthor().getId()));
-                    taskRepository.delete(task);
-                })
-        );
     }
 }

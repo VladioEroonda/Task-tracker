@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,11 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@TestPropertySource(locations = "/application-test.properties")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integration-test")
+@ActiveProfiles(profiles = "test")
+@SpringBootTest
 class UserServiceImplTest {
-    private static int UNREACHABLE_ID = 100_000;
+    private static final int UNREACHABLE_ID = 100_000;
     @Autowired
     private UserService userService;
     @Autowired
@@ -39,10 +37,9 @@ class UserServiceImplTest {
         long expectedUserId = addTestUser();
 
         List<UserResponseDto> actualUsers = userService.getAllUsers();
+        deleteTestUser(expectedUserId);
 
         assertTrue(actualUsers.size() > 0);
-
-        deleteTestUser(expectedUserId);
     }
 
     @Test
@@ -50,10 +47,9 @@ class UserServiceImplTest {
         long expectedUserId = addTestUser();
 
         UserResponseDto actual = userService.getUserByIdAndReturnResponseDto(expectedUserId);
+        deleteTestUser(expectedUserId);
 
         assertEquals(expectedUserId, actual.getId());
-
-        deleteTestUser(expectedUserId);
     }
 
     @Test
@@ -72,10 +68,9 @@ class UserServiceImplTest {
         long expectedUserId = addTestUser();
 
         User actual = userService.getUserByIdAndReturnEntity(expectedUserId);
+        deleteTestUser(expectedUserId);
 
         assertEquals(expectedUserId, actual.getId());
-
-        deleteTestUser(expectedUserId);
     }
 
     @Test
@@ -121,11 +116,10 @@ class UserServiceImplTest {
         );
 
         UserResponseDto actual = userService.addUser(expected);
+        deleteTestUser(actual.getId());
 
         assertEquals(expected.getName(), actual.getName());
         assertNotNull(actual.getId());
-
-        deleteTestUser(actual.getId());
     }
 
     @Test
@@ -146,7 +140,6 @@ class UserServiceImplTest {
         });
 
         deleteTestUser(expectedId);
-        System.out.println("deleted" + expectedId);
     }
 
     @Test
@@ -162,10 +155,9 @@ class UserServiceImplTest {
                 "testAccount"
         );
         UserResponseDto actual = userService.updateUser(expected);
+        deleteTestUser(addedId);
 
         assertEquals(randomName, actual.getName());
-
-        deleteTestUser(addedId);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.github.vladioeroonda.tasktracker.service.impl;
 
+import com.github.vladioeroonda.tasktracker.Util.TestUtil;
 import com.github.vladioeroonda.tasktracker.dto.response.TaskResponseDto;
 import com.github.vladioeroonda.tasktracker.model.Project;
 import com.github.vladioeroonda.tasktracker.model.ProjectStatus;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,9 +29,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@TestPropertySource(locations = "/application-test.properties")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integration-test")
+@ActiveProfiles(profiles = "test")
+@SpringBootTest
 class TaskFilterServiceImplTest {
     @Autowired
     private TaskFilterService taskFilterService;
@@ -43,6 +42,8 @@ class TaskFilterServiceImplTest {
     private ReleaseRepository releaseRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TestUtil testUtil;
 
     @Test
     void getFilteredTasks_ShouldReturnThreeTasks_WithSameDescription() {
@@ -56,12 +57,9 @@ class TaskFilterServiceImplTest {
                 null,
                 null,
                 null);
+        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
 
         assertEquals(expectedTasks.size(), actualTasks.size());
-
-        for (int i = 0; i < expectedTasks.size(); i++) {
-            deleteTaskById(expectedTasks.get(i).getId());
-        }
     }
 
     @Test
@@ -76,14 +74,9 @@ class TaskFilterServiceImplTest {
                 null,
                 null,
                 null);
-
-        System.out.println(actualTasks.size());
+        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
 
         assertTrue(actualTasks.size() >= 2);
-
-        for (int i = 0; i < expectedTasks.size(); i++) {
-            deleteTaskById(expectedTasks.get(i).getId());
-        }
     }
 
     @Test
@@ -101,16 +94,11 @@ class TaskFilterServiceImplTest {
                 null,
                 null,
                 null);
+        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
 
-        System.out.println(actualTasks.size());
-
-        assertTrue(nameForSearch.equals(actualTasks.get(0).getName()));
-        assertTrue(descriptionForSearch.equals(actualTasks.get(0).getDescription()));
-        assertTrue(statusForSearch.equals(expectedTasks.get(0).getStatus()));
-
-        for (int i = 0; i < expectedTasks.size(); i++) {
-            deleteTaskById(expectedTasks.get(i).getId());
-        }
+        assertEquals(nameForSearch, actualTasks.get(0).getName());
+        assertEquals(descriptionForSearch, actualTasks.get(0).getDescription());
+        assertEquals(statusForSearch, expectedTasks.get(0).getStatus());
     }
 
     @Test
@@ -135,14 +123,11 @@ class TaskFilterServiceImplTest {
                 releaseVersionForSearch,
                 authorNameForSearch,
                 executorNameForSearch);
+        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
 
-        assertTrue(nameForSearch.equals(actualTasks.get(0).getName()));
-        assertTrue(descriptionForSearch.equals(actualTasks.get(0).getDescription()));
-        assertTrue(statusForSearch.equals(expectedTasks.get(0).getStatus()));
-
-        for (int i = 0; i < expectedTasks.size(); i++) {
-            deleteTaskById(expectedTasks.get(i).getId());
-        }
+        assertEquals(nameForSearch, actualTasks.get(0).getName());
+        assertEquals(descriptionForSearch, actualTasks.get(0).getDescription());
+        assertEquals(statusForSearch, expectedTasks.get(0).getStatus());
     }
 
     private List<Task> addThreeTasksWithSameDescription() {
@@ -179,16 +164,5 @@ class TaskFilterServiceImplTest {
         tasks.add(taskRepository.save(taskForSave2));
         tasks.add(taskRepository.save(taskForSave3));
         return tasks;
-    }
-
-    private void deleteTaskById(long taskId) {
-        taskRepository.findById(taskId).ifPresent(
-                (task -> {
-                    projectRepository.delete(projectRepository.getById(task.getProject().getId()));
-                    releaseRepository.delete(releaseRepository.getById(task.getRelease().getId()));
-                    userRepository.delete(userRepository.getById(task.getAuthor().getId()));
-                    taskRepository.delete(task);
-                })
-        );
     }
 }

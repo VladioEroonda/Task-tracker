@@ -1,5 +1,6 @@
 package com.github.vladioeroonda.tasktracker.service.impl;
 
+import com.github.vladioeroonda.tasktracker.Util.TestUtil;
 import com.github.vladioeroonda.tasktracker.dto.request.ReleaseClosingRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ReleaseResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.ReleaseClosingException;
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,15 +31,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@TestPropertySource(locations = "/application-test.properties")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integration-test")
+@ActiveProfiles(profiles = "test")
+@SpringBootTest
 class ReleaseManagementServiceImplTest {
-    private static int UNREACHABLE_ID = 100_000;
+    private static final int UNREACHABLE_ID = 100_000;
     @Autowired
     private ReleaseManagementService releaseManagementService;
     @Autowired
@@ -50,6 +49,8 @@ class ReleaseManagementServiceImplTest {
     private UserRepository userRepository;
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private TestUtil testUtil;
 
     @Test
     void countUnfinishedTasksByReleaseId() {
@@ -57,12 +58,9 @@ class ReleaseManagementServiceImplTest {
         long releaseId = expectedTasks.get(0).getRelease().getId();
 
         int actual = releaseManagementService.countUnfinishedTasksByReleaseId(releaseId);
+        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
 
-        assertTrue(actual == expectedTasks.size());
-
-        for (int i = 0; i < expectedTasks.size(); i++) {
-            deleteTaskById(expectedTasks.get(i).getId());
-        }
+        assertEquals(actual, expectedTasks.size());
     }
 
     @Test
@@ -87,12 +85,10 @@ class ReleaseManagementServiceImplTest {
         ReleaseResponseDto actual = releaseManagementService.closeRelease(expected);
 
         assertNotNull(actual.getFinishTime());
-        assertTrue(getTaskStatusById(expectedTasks.get(0).getId()).equals(TaskStatus.CANCELLED));
-        assertTrue(getTaskStatusById(expectedTasks.get(1).getId()).equals(TaskStatus.CANCELLED));
+        assertEquals(getTaskStatusById(expectedTasks.get(0).getId()), TaskStatus.CANCELLED);
+        assertEquals(getTaskStatusById(expectedTasks.get(1).getId()), TaskStatus.CANCELLED);
 
-        for (int i = 0; i < expectedTasks.size(); i++) {
-            deleteTaskById(expectedTasks.get(i).getId());
-        }
+        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
     }
 
     @Test
@@ -163,17 +159,6 @@ class ReleaseManagementServiceImplTest {
         tasks.add(taskRepository.save(taskForSave1));
         tasks.add(taskRepository.save(taskForSave2));
         return tasks;
-    }
-
-    private void deleteTaskById(long taskId) {
-        taskRepository.findById(taskId).ifPresent(
-                (task -> {
-                    projectRepository.delete(projectRepository.getById(task.getProject().getId()));
-                    releaseRepository.delete(releaseRepository.getById(task.getRelease().getId()));
-                    userRepository.delete(userRepository.getById(task.getAuthor().getId()));
-                    taskRepository.delete(task);
-                })
-        );
     }
 
     private TaskStatus getTaskStatusById(long taskId) {

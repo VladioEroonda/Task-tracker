@@ -20,6 +20,7 @@ import com.github.vladioeroonda.tasktracker.service.ReleaseService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -36,11 +37,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@TestPropertySource(locations = "/application-test.properties")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integration-test")
+@ActiveProfiles(profiles = "test")
+@SpringBootTest
 class ReleaseServiceImplTest {
-    private static int UNREACHABLE_ID = 100_000;
+    private static final int UNREACHABLE_ID = 100_000;
     @Autowired
     private ReleaseService releaseService;
     @Autowired
@@ -58,11 +58,10 @@ class ReleaseServiceImplTest {
         long expectedId2 = returnAddedReleaseId();
 
         List<ReleaseResponseDto> allReleases = releaseService.getAllReleases();
-
-        assertTrue(allReleases.size() >= 2);
-
         deleteReleaseById(expectedId);
         deleteReleaseById(expectedId2);
+
+        assertTrue(allReleases.size() >= 2);
     }
 
     @Test
@@ -70,10 +69,9 @@ class ReleaseServiceImplTest {
         long expectedId = returnAddedReleaseId();
 
         ReleaseResponseDto actual = releaseService.getReleaseByIdAndReturnResponseDto(expectedId);
+        deleteReleaseById(expectedId);
 
         assertNotNull(actual);
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -92,10 +90,9 @@ class ReleaseServiceImplTest {
         long expectedId = returnAddedReleaseId();
 
         Release actual = releaseService.getReleaseByIdAndReturnEntity(expectedId);
+        deleteReleaseById(expectedId);
 
         assertNotNull(actual);
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -138,11 +135,10 @@ class ReleaseServiceImplTest {
         );
 
         ReleaseResponseDto actual = releaseService.addRelease(expected);
+        deleteReleaseById(actual.getId());
 
         assertNotNull(actual);
         assertTrue(expected.getVersion().equals(actual.getVersion()));
-
-        deleteReleaseById(actual.getId());
     }
 
     @Test
@@ -157,12 +153,11 @@ class ReleaseServiceImplTest {
         );
 
         ReleaseResponseDto actual = releaseService.updateRelease(expected);
+        deleteReleaseById(expectedId);
 
         assertNotNull(actual);
         assertEquals(expectedVersion, actual.getVersion());
         assertEquals(expectedDate, actual.getStartTime());
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -227,12 +222,9 @@ class ReleaseServiceImplTest {
         long expectedProjectId = expectedTasks.get(0).getProject().getId();
 
         List<Release> actual = releaseService.getAllNotClosedReleasesByProjectId(expectedProjectId);
+        expectedTasks.stream().mapToLong(Task::getId).forEach(this::deleteTaskById);
 
-        assertTrue(actual.size() == 2);
-
-        for (int i = 0; i < expectedTasks.size(); i++) {
-            deleteTaskById(expectedTasks.get(i).getId());
-        }
+        assertEquals(2, actual.size());
     }
 
     @Test

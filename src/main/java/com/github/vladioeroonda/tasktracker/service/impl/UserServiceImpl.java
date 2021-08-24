@@ -134,10 +134,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                     throw exception;
                 });
 
-        System.out.println("servUSER " + userRequestDto);
-        System.out.println("servUSER id " + userRequestDto.getLogin());
-        System.out.println("servUSER id2 " + userFromDB.getLogin());
-
         Optional<User> userByLogin = userRepository.getUserByLogin(userRequestDto.getLogin());
         if (userByLogin.isPresent()) {
             UserBadDataException exception =

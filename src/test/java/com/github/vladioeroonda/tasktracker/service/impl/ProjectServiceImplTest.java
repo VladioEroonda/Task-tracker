@@ -1,5 +1,6 @@
 package com.github.vladioeroonda.tasktracker.service.impl;
 
+import com.github.vladioeroonda.tasktracker.Util.TestUtil;
 import com.github.vladioeroonda.tasktracker.dto.request.ProjectRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.request.UserRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ProjectResponseDto;
@@ -19,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,17 +32,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@TestPropertySource(locations = "/application-test.properties")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integration-test")
+@ActiveProfiles(profiles = "test")
+@SpringBootTest
 class ProjectServiceImplTest {
-    private static int UNREACHABLE_ID = 100_000;
+    private static final int UNREACHABLE_ID = 100_000;
     @Autowired
     private ProjectService projectService;
     @Autowired
     private ProjectRepository projectRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TestUtil testUtil;
     @MockBean
     private PaymentClient paymentClient;
 
@@ -64,12 +65,11 @@ class ProjectServiceImplTest {
                 .thenReturn(true);
 
         ProjectResponseDto actual = projectService.addProject(expected);
+        testUtil.deleteTestProjectAndUser(actual.getId());
 
         assertEquals(expected.getName(), actual.getName());
         assertEquals(expected.getStatus(), actual.getStatus());
         assertEquals(expected.getPrice(), actual.getPrice());
-
-        deleteProjectById(actual.getId());
     }
 
     @Test
@@ -149,11 +149,10 @@ class ProjectServiceImplTest {
         long expectedId = returnAddedProject().getId();
 
         ProjectResponseDto actual = projectService.getProjectByIdAndReturnResponseDto(expectedId);
+        testUtil.deleteTestProjectAndUser(expectedId);
 
         assertNotNull(actual);
         assertEquals(expectedId, actual.getId());
-
-        deleteProjectById(expectedId);
     }
 
     @Test
@@ -164,7 +163,7 @@ class ProjectServiceImplTest {
             projectService.getProjectByIdAndReturnResponseDto(expectedId + UNREACHABLE_ID);
         });
 
-        deleteProjectById(expectedId);
+        testUtil.deleteTestProjectAndUser(expectedId);
     }
 
     @Test
@@ -172,11 +171,10 @@ class ProjectServiceImplTest {
         long expectedId = returnAddedProject().getId();
 
         Project actual = projectService.getProjectByIdAndReturnEntity(expectedId);
+        testUtil.deleteTestProjectAndUser(expectedId);
 
         assertNotNull(actual);
         assertEquals(expectedId, actual.getId());
-
-        deleteProjectById(expectedId);
     }
 
     @Test
@@ -187,7 +185,7 @@ class ProjectServiceImplTest {
             projectService.getProjectByIdAndReturnEntity(expectedId + UNREACHABLE_ID);
         });
 
-        deleteProjectById(expectedId);
+        testUtil.deleteTestProjectAndUser(expectedId);
     }
 
     @Test
@@ -196,7 +194,7 @@ class ProjectServiceImplTest {
 
         projectService.checkProjectExistsById(expectedId);
 
-        deleteProjectById(expectedId);
+        testUtil.deleteTestProjectAndUser(expectedId);
     }
 
     @Test
@@ -207,7 +205,7 @@ class ProjectServiceImplTest {
             projectService.checkProjectExistsById(expectedId + UNREACHABLE_ID);
         });
 
-        deleteProjectById(expectedId);
+        testUtil.deleteTestProjectAndUser(expectedId);
     }
 
     @Test
@@ -224,12 +222,11 @@ class ProjectServiceImplTest {
         );
 
         ProjectResponseDto actual = projectService.updateProject(expectedProject);
+        testUtil.deleteTestProjectAndUser(createdProject.getId());
 
         assertNotNull(actual);
         assertEquals(expectedProject.getName(), actual.getName());
         assertEquals(expectedProject.getStatus(), actual.getStatus());
-
-        deleteProjectById(createdProject.getId());
     }
 
     @Test
@@ -249,7 +246,7 @@ class ProjectServiceImplTest {
             projectService.updateProject(expectedProject);
         });
 
-        deleteProjectById(createdProject.getId());
+        testUtil.deleteTestProjectAndUser(createdProject.getId());
     }
 
     @Test
@@ -270,9 +267,8 @@ class ProjectServiceImplTest {
             projectService.deleteProject(expectedId + UNREACHABLE_ID);
         });
 
-        deleteProjectById(expectedId);
+        testUtil.deleteTestProjectAndUser(expectedId);
     }
-
 
     @Test
     void getAllProjects() {
@@ -280,11 +276,10 @@ class ProjectServiceImplTest {
         long expectedIdProject2 = returnAddedProject().getId();
 
         List<ProjectResponseDto> actual = projectService.getAllProjects();
+        testUtil.deleteTestProjectAndUser(expectedIdProject1);
+        testUtil.deleteTestProjectAndUser(expectedIdProject2);
 
         assertTrue(actual.size() >= 2);
-
-        deleteProjectById(expectedIdProject1);
-        deleteProjectById(expectedIdProject2);
     }
 
     private Project returnAddedProject() {
@@ -304,14 +299,6 @@ class ProjectServiceImplTest {
                 new BigDecimal("3000")
         );
         return projectRepository.save(project);
-    }
-
-    private void deleteProjectById(long projectId) {
-        Optional<Project> projectForDelete = projectRepository.findById(projectId);
-        if (projectForDelete.isPresent()) {
-            projectRepository.delete(projectForDelete.get());
-            userRepository.delete(userRepository.getById(projectForDelete.get().getCustomer().getId()));
-        }
     }
 
     private long returnSavedUserId(String bankAccountId) {
