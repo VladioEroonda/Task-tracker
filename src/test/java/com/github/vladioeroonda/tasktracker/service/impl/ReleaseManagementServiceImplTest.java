@@ -18,10 +18,12 @@ import com.github.vladioeroonda.tasktracker.repository.ReleaseRepository;
 import com.github.vladioeroonda.tasktracker.repository.TaskRepository;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.ReleaseManagementService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -36,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles(profiles = "test")
+@TestPropertySource(locations = "/application-test.properties")
 @SpringBootTest
 class ReleaseManagementServiceImplTest {
     private static final int UNREACHABLE_ID = 100_000;
@@ -58,7 +61,6 @@ class ReleaseManagementServiceImplTest {
         long releaseId = expectedTasks.get(0).getRelease().getId();
 
         int actual = releaseManagementService.countUnfinishedTasksByReleaseId(releaseId);
-        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
 
         assertEquals(actual, expectedTasks.size());
     }
@@ -70,8 +72,6 @@ class ReleaseManagementServiceImplTest {
         assertThrows(ReleaseNotFoundException.class, () -> {
             releaseManagementService.countUnfinishedTasksByReleaseId(expectedId + UNREACHABLE_ID);
         });
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -87,8 +87,6 @@ class ReleaseManagementServiceImplTest {
         assertNotNull(actual.getFinishTime());
         assertEquals(getTaskStatusById(expectedTasks.get(0).getId()), TaskStatus.CANCELLED);
         assertEquals(getTaskStatusById(expectedTasks.get(1).getId()), TaskStatus.CANCELLED);
-
-        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
     }
 
     @Test
@@ -100,8 +98,6 @@ class ReleaseManagementServiceImplTest {
         assertThrows(ReleaseNotFoundException.class, () -> {
             releaseManagementService.closeRelease(requestDto);
         });
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -113,18 +109,16 @@ class ReleaseManagementServiceImplTest {
         assertThrows(ReleaseClosingException.class, () -> {
             releaseManagementService.closeRelease(requestDto);
         });
+    }
 
-        deleteReleaseById(expectedId);
+    @AfterEach
+    public void cleanUp() {
+        testUtil.clearBase();
     }
 
     private long addOnlyRelease() {
         Release release = new Release("testVersion", LocalDateTime.now(), null);
         return releaseRepository.save(release).getId();
-    }
-
-    private void deleteReleaseById(long releaseId) {
-        Optional<Release> releaseForDelete = releaseRepository.findById(releaseId);
-        releaseForDelete.ifPresent(release -> releaseRepository.delete(release));
     }
 
     private List<Task> addTwoNotFinishedTasks() {

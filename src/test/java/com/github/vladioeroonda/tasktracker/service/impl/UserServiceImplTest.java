@@ -1,5 +1,6 @@
 package com.github.vladioeroonda.tasktracker.service.impl;
 
+import com.github.vladioeroonda.tasktracker.Util.TestUtil;
 import com.github.vladioeroonda.tasktracker.dto.request.UserRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.UserResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.UserBadDataException;
@@ -8,10 +9,12 @@ import com.github.vladioeroonda.tasktracker.model.Role;
 import com.github.vladioeroonda.tasktracker.model.User;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles(profiles = "test")
+@TestPropertySource(locations = "/application-test.properties")
 @SpringBootTest
 class UserServiceImplTest {
     private static final int UNREACHABLE_ID = 100_000;
@@ -31,13 +35,14 @@ class UserServiceImplTest {
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TestUtil testUtil;
 
     @Test
     void getAllUsers() {
         long expectedUserId = addTestUser();
 
         List<UserResponseDto> actualUsers = userService.getAllUsers();
-        deleteTestUser(expectedUserId);
 
         assertTrue(actualUsers.size() > 0);
     }
@@ -47,7 +52,6 @@ class UserServiceImplTest {
         long expectedUserId = addTestUser();
 
         UserResponseDto actual = userService.getUserByIdAndReturnResponseDto(expectedUserId);
-        deleteTestUser(expectedUserId);
 
         assertEquals(expectedUserId, actual.getId());
     }
@@ -59,8 +63,6 @@ class UserServiceImplTest {
         assertThrows(UserNotFoundException.class, () -> {
             userService.getUserByIdAndReturnResponseDto(expectedUserId + UNREACHABLE_ID);
         });
-
-        deleteTestUser(expectedUserId);
     }
 
     @Test
@@ -68,7 +70,6 @@ class UserServiceImplTest {
         long expectedUserId = addTestUser();
 
         User actual = userService.getUserByIdAndReturnEntity(expectedUserId);
-        deleteTestUser(expectedUserId);
 
         assertEquals(expectedUserId, actual.getId());
     }
@@ -80,8 +81,6 @@ class UserServiceImplTest {
         assertThrows(UserNotFoundException.class, () -> {
             userService.checkUserExistsById(expectedUserId + UNREACHABLE_ID);
         });
-
-        deleteTestUser(expectedUserId);
     }
 
     @Test
@@ -89,8 +88,6 @@ class UserServiceImplTest {
         long expectedUserId = addTestUser();
 
         userService.checkUserExistsById(expectedUserId);
-
-        deleteTestUser(expectedUserId);
     }
 
     @Test
@@ -100,8 +97,6 @@ class UserServiceImplTest {
         assertThrows(UserNotFoundException.class, () -> {
             userService.checkUserExistsById(expectedUserId + UNREACHABLE_ID);
         });
-
-        deleteTestUser(expectedUserId);
     }
 
     @Test
@@ -116,7 +111,6 @@ class UserServiceImplTest {
         );
 
         UserResponseDto actual = userService.addUser(expected);
-        deleteTestUser(actual.getId());
 
         assertEquals(expected.getName(), actual.getName());
         assertNotNull(actual.getId());
@@ -138,8 +132,6 @@ class UserServiceImplTest {
         assertThrows(UserBadDataException.class, () -> {
             userService.addUser(expected);
         });
-
-        deleteTestUser(expectedId);
     }
 
     @Test
@@ -155,7 +147,6 @@ class UserServiceImplTest {
                 "testAccount"
         );
         UserResponseDto actual = userService.updateUser(expected);
-        deleteTestUser(addedId);
 
         assertEquals(randomName, actual.getName());
     }
@@ -177,8 +168,6 @@ class UserServiceImplTest {
         assertThrows(UserNotFoundException.class, () -> {
             userService.updateUser(expected);
         });
-
-        deleteTestUser(addedId);
     }
 
     @Test
@@ -199,9 +188,6 @@ class UserServiceImplTest {
         assertThrows(UserBadDataException.class, () -> {
             userService.updateUser(expected);
         });
-
-        deleteTestUser(addedUserId);
-        deleteTestUser(anotherAddedUserId);
     }
 
     @Test
@@ -220,6 +206,11 @@ class UserServiceImplTest {
         });
     }
 
+    @AfterEach
+    public void cleanUp() {
+        testUtil.clearBase();
+    }
+
     private long addTestUser() {
         User userForTest = new User(
                 UUID.randomUUID().toString(),
@@ -236,10 +227,5 @@ class UserServiceImplTest {
         if (userFromBd.isPresent()) {
             return userFromBd.get().getLogin();
         } else throw new UserNotFoundException("Пользователь не найден");
-    }
-
-    private void deleteTestUser(long id) {
-        Optional<User> userForDelete = userRepository.findById(id);
-        userForDelete.ifPresent(user -> userRepository.delete(user));
     }
 }

@@ -1,5 +1,6 @@
 package com.github.vladioeroonda.tasktracker.service.impl;
 
+import com.github.vladioeroonda.tasktracker.Util.TestUtil;
 import com.github.vladioeroonda.tasktracker.dto.request.ReleaseRequestDto;
 import com.github.vladioeroonda.tasktracker.dto.response.ReleaseResponseDto;
 import com.github.vladioeroonda.tasktracker.exception.ProjectNotFoundException;
@@ -17,10 +18,10 @@ import com.github.vladioeroonda.tasktracker.repository.ReleaseRepository;
 import com.github.vladioeroonda.tasktracker.repository.TaskRepository;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.ReleaseService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -28,7 +29,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles(profiles = "test")
+@TestPropertySource(locations = "/application-test.properties")
 @SpringBootTest
 class ReleaseServiceImplTest {
     private static final int UNREACHABLE_ID = 100_000;
@@ -51,6 +52,8 @@ class ReleaseServiceImplTest {
     private ProjectRepository projectRepository;
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private TestUtil testUtil;
 
     @Test
     void getAllReleases() {
@@ -58,8 +61,6 @@ class ReleaseServiceImplTest {
         long expectedId2 = returnAddedReleaseId();
 
         List<ReleaseResponseDto> allReleases = releaseService.getAllReleases();
-        deleteReleaseById(expectedId);
-        deleteReleaseById(expectedId2);
 
         assertTrue(allReleases.size() >= 2);
     }
@@ -69,7 +70,6 @@ class ReleaseServiceImplTest {
         long expectedId = returnAddedReleaseId();
 
         ReleaseResponseDto actual = releaseService.getReleaseByIdAndReturnResponseDto(expectedId);
-        deleteReleaseById(expectedId);
 
         assertNotNull(actual);
     }
@@ -81,8 +81,6 @@ class ReleaseServiceImplTest {
         assertThrows(ReleaseNotFoundException.class, () -> {
             releaseService.getReleaseByIdAndReturnResponseDto(expectedId + UNREACHABLE_ID);
         });
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -90,7 +88,6 @@ class ReleaseServiceImplTest {
         long expectedId = returnAddedReleaseId();
 
         Release actual = releaseService.getReleaseByIdAndReturnEntity(expectedId);
-        deleteReleaseById(expectedId);
 
         assertNotNull(actual);
     }
@@ -102,8 +99,6 @@ class ReleaseServiceImplTest {
         assertThrows(ReleaseNotFoundException.class, () -> {
             releaseService.getReleaseByIdAndReturnEntity(expectedId + UNREACHABLE_ID);
         });
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -111,8 +106,6 @@ class ReleaseServiceImplTest {
         long expectedId = returnAddedReleaseId();
 
         releaseService.checkReleaseExistsById(expectedId);
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -122,8 +115,6 @@ class ReleaseServiceImplTest {
         assertThrows(ReleaseNotFoundException.class, () -> {
             releaseService.checkReleaseExistsById(expectedId + UNREACHABLE_ID);
         });
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -135,10 +126,9 @@ class ReleaseServiceImplTest {
         );
 
         ReleaseResponseDto actual = releaseService.addRelease(expected);
-        deleteReleaseById(actual.getId());
 
         assertNotNull(actual);
-        assertTrue(expected.getVersion().equals(actual.getVersion()));
+        assertEquals(expected.getVersion(), actual.getVersion());
     }
 
     @Test
@@ -153,7 +143,6 @@ class ReleaseServiceImplTest {
         );
 
         ReleaseResponseDto actual = releaseService.updateRelease(expected);
-        deleteReleaseById(expectedId);
 
         assertNotNull(actual);
         assertEquals(expectedVersion, actual.getVersion());
@@ -174,8 +163,6 @@ class ReleaseServiceImplTest {
         assertThrows(ReleaseNotFoundException.class, () -> {
             releaseService.updateRelease(expected);
         });
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -192,8 +179,6 @@ class ReleaseServiceImplTest {
         assertThrows(ReleaseBadDataException.class, () -> {
             releaseService.updateRelease(expected);
         });
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -201,8 +186,6 @@ class ReleaseServiceImplTest {
         long expectedId = returnAddedReleaseId();
 
         releaseService.deleteRelease(expectedId);
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -212,8 +195,6 @@ class ReleaseServiceImplTest {
         assertThrows(ReleaseNotFoundException.class, () -> {
             releaseService.deleteRelease(expectedId + UNREACHABLE_ID);
         });
-
-        deleteReleaseById(expectedId);
     }
 
     @Test
@@ -222,7 +203,6 @@ class ReleaseServiceImplTest {
         long expectedProjectId = expectedTasks.get(0).getProject().getId();
 
         List<Release> actual = releaseService.getAllNotClosedReleasesByProjectId(expectedProjectId);
-        expectedTasks.stream().mapToLong(Task::getId).forEach(this::deleteTaskById);
 
         assertEquals(2, actual.size());
     }
@@ -234,18 +214,16 @@ class ReleaseServiceImplTest {
         assertThrows(ProjectNotFoundException.class, () -> {
             releaseService.getAllNotClosedReleasesByProjectId(expectedProjectId + UNREACHABLE_ID);
         });
+    }
 
-        deleteProjectById(expectedProjectId);
+    @AfterEach
+    public void cleanUp() {
+        testUtil.clearBase();
     }
 
     private long returnAddedReleaseId() {
         Release releaseForTest = new Release(UUID.randomUUID().toString(), LocalDateTime.now(), null);
         return releaseRepository.save(releaseForTest).getId();
-    }
-
-    private void deleteReleaseById(long releaseId) {
-        Optional<Release> releaseForDelete = releaseRepository.findById(releaseId);
-        releaseForDelete.ifPresent(release -> releaseRepository.delete(release));
     }
 
     private long returnAddedProjectId() {
@@ -265,16 +243,6 @@ class ReleaseServiceImplTest {
                 new BigDecimal("3000")
         );
         return projectRepository.save(project).getId();
-    }
-
-    private void deleteProjectById(long projectId) {
-        Optional<Project> projectForDelete = projectRepository.findById(projectId);
-        if (projectForDelete.isPresent()) {
-            projectForDelete.ifPresent(project -> {
-                projectRepository.delete(project);
-            });
-            userRepository.delete(userRepository.getById(projectForDelete.get().getId()));
-        }
     }
 
     private List<Task> addTestTasksFromOneProjectAndTwoReleases() {
@@ -317,16 +285,5 @@ class ReleaseServiceImplTest {
         tasks.add(taskRepository.save(taskForSave2));
         tasks.add(taskRepository.save(taskForSave3));
         return tasks;
-    }
-
-    private void deleteTaskById(long taskId) {
-        taskRepository.findById(taskId).ifPresent(
-                (task -> {
-                    projectRepository.delete(projectRepository.getById(task.getProject().getId()));
-                    releaseRepository.delete(releaseRepository.getById(task.getRelease().getId()));
-                    userRepository.delete(userRepository.getById(task.getAuthor().getId()));
-                    taskRepository.delete(task);
-                })
-        );
     }
 }

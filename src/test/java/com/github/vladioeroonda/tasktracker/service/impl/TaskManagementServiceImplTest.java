@@ -23,10 +23,12 @@ import com.github.vladioeroonda.tasktracker.repository.ReleaseRepository;
 import com.github.vladioeroonda.tasktracker.repository.TaskRepository;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.TaskManagementService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -38,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles(profiles = "test")
+@TestPropertySource(locations = "/application-test.properties")
 @SpringBootTest
 class TaskManagementServiceImplTest {
     private static final int UNREACHABLE_ID = 100_000;
@@ -69,7 +72,6 @@ class TaskManagementServiceImplTest {
         );
 
         TaskResponseDto actual = taskManagementService.updateTask(expectedTask);
-        testUtil.deleteTaskById(existingTask.getId());
 
         assertNotNull(actual);
         assertEquals(expectedTask.getName(), actual.getName());
@@ -93,8 +95,6 @@ class TaskManagementServiceImplTest {
         assertThrows(TaskBadDataException.class, () -> {
             taskManagementService.updateTask(expectedTask);
         });
-
-        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -114,8 +114,6 @@ class TaskManagementServiceImplTest {
         assertThrows(TaskBadDataException.class, () -> {
             taskManagementService.updateTask(expectedTask);
         });
-
-        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -135,8 +133,6 @@ class TaskManagementServiceImplTest {
         assertThrows(TaskBadDataException.class, () -> {
             taskManagementService.updateTask(expectedTask);
         });
-
-        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -156,8 +152,6 @@ class TaskManagementServiceImplTest {
         assertThrows(UserNotFoundException.class, () -> {
             taskManagementService.updateTask(expectedTask);
         });
-
-        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -177,8 +171,6 @@ class TaskManagementServiceImplTest {
         assertThrows(TaskNotFoundException.class, () -> {
             taskManagementService.updateTask(expectedTask);
         });
-
-        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -198,8 +190,6 @@ class TaskManagementServiceImplTest {
         assertThrows(ProjectNotFoundException.class, () -> {
             taskManagementService.updateTask(expectedTask);
         });
-
-        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -219,8 +209,6 @@ class TaskManagementServiceImplTest {
         assertThrows(ReleaseNotFoundException.class, () -> {
             taskManagementService.updateTask(expectedTask);
         });
-
-        testUtil.deleteTaskById(existingTask.getId());
     }
 
     @Test
@@ -240,8 +228,11 @@ class TaskManagementServiceImplTest {
         assertThrows(UserNotFoundException.class, () -> {
             taskManagementService.updateTask(expectedTask);
         });
+    }
 
-        testUtil.deleteTaskById(existingTask.getId());
+    @AfterEach
+    public void cleanUp() {
+        testUtil.clearBase();
     }
 
     private Task returnFormedTask() {

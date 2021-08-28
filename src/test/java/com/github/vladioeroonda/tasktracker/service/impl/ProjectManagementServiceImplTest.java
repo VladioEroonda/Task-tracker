@@ -17,14 +17,15 @@ import com.github.vladioeroonda.tasktracker.repository.ReleaseRepository;
 import com.github.vladioeroonda.tasktracker.repository.TaskRepository;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.ProjectManagementService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @ActiveProfiles(profiles = "test")
+@TestPropertySource(locations = "/application-test.properties")
 @SpringBootTest
 class ProjectManagementServiceImplTest {
     private static final int UNREACHABLE_ID = 100_000;
@@ -55,7 +57,6 @@ class ProjectManagementServiceImplTest {
                 new ProjectClosingRequestDto(returnExistingProjectId(ProjectStatus.IN_PROGRESS), ProjectStatus.FINISHED);
 
         ProjectResponseDto actual = projectManagementService.closeProject(expected);
-        testUtil.deleteTestProjectAndUser(expected.getId());
 
         assertEquals(expected.getProjectStatus(), actual.getStatus());
     }
@@ -64,7 +65,6 @@ class ProjectManagementServiceImplTest {
     void closeProject_ShouldThrowException_IfRequestDtoStatusNotFinished() {
         ProjectClosingRequestDto expected =
                 new ProjectClosingRequestDto(returnExistingProjectId(ProjectStatus.IN_PROGRESS), ProjectStatus.IN_PROGRESS);
-        testUtil.deleteTestProjectAndUser(expected.getId());
 
         assertThrows(ProjectClosingException.class, () -> {
             projectManagementService.closeProject(expected);
@@ -76,7 +76,6 @@ class ProjectManagementServiceImplTest {
         ProjectClosingRequestDto expected =
                 new ProjectClosingRequestDto(returnExistingProjectId(ProjectStatus.IN_PROGRESS), ProjectStatus.FINISHED);
         expected.setId(expected.getId() + UNREACHABLE_ID);
-        testUtil.deleteTestProjectAndUser(expected.getId());
 
         assertThrows(ProjectNotFoundException.class, () -> {
             projectManagementService.closeProject(expected);
@@ -87,7 +86,6 @@ class ProjectManagementServiceImplTest {
     void closeProject_ShouldThrowException_IfProjectAlreadyFinished() {
         ProjectClosingRequestDto expected =
                 new ProjectClosingRequestDto(returnExistingProjectId(ProjectStatus.FINISHED), ProjectStatus.IN_PROGRESS);
-        testUtil.deleteTestProjectAndUser(expected.getId());
 
         assertThrows(ProjectClosingException.class, () -> {
             projectManagementService.closeProject(expected);
@@ -104,8 +102,6 @@ class ProjectManagementServiceImplTest {
         assertThrows(ProjectClosingException.class, () -> {
             projectManagementService.closeProject(expected);
         });
-
-        deleteAllAfterNotClosedReleaseTest(expectedTask.getId());
     }
 
     private Task returnTaskForTestNotClosedRelease() {
@@ -138,14 +134,9 @@ class ProjectManagementServiceImplTest {
         return taskRepository.save(taskForSave1);
     }
 
-    private void deleteAllAfterNotClosedReleaseTest(long taskId) {
-        Optional<Task> taskFromBD = taskRepository.findById(taskId);
-        if (taskFromBD.isPresent()) {
-            taskRepository.delete(taskFromBD.get());
-            projectRepository.delete(taskFromBD.get().getProject());
-            releaseRepository.delete(taskFromBD.get().getRelease());
-            userRepository.delete(taskFromBD.get().getAuthor());
-        }
+    @AfterEach
+    public void cleanUp() {
+        testUtil.clearBase();
     }
 
     private long returnExistingProjectId(ProjectStatus status) {

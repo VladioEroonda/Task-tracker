@@ -14,10 +14,12 @@ import com.github.vladioeroonda.tasktracker.repository.ReleaseRepository;
 import com.github.vladioeroonda.tasktracker.repository.TaskRepository;
 import com.github.vladioeroonda.tasktracker.repository.UserRepository;
 import com.github.vladioeroonda.tasktracker.service.TaskFilterService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles(profiles = "test")
+@TestPropertySource(locations = "/application-test.properties")
 @SpringBootTest
 class TaskFilterServiceImplTest {
     @Autowired
@@ -57,7 +60,6 @@ class TaskFilterServiceImplTest {
                 null,
                 null,
                 null);
-        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
 
         assertEquals(expectedTasks.size(), actualTasks.size());
     }
@@ -74,7 +76,6 @@ class TaskFilterServiceImplTest {
                 null,
                 null,
                 null);
-        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
 
         assertTrue(actualTasks.size() >= 2);
     }
@@ -94,7 +95,6 @@ class TaskFilterServiceImplTest {
                 null,
                 null,
                 null);
-        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
 
         assertEquals(nameForSearch, actualTasks.get(0).getName());
         assertEquals(descriptionForSearch, actualTasks.get(0).getDescription());
@@ -123,11 +123,15 @@ class TaskFilterServiceImplTest {
                 releaseVersionForSearch,
                 authorNameForSearch,
                 executorNameForSearch);
-        expectedTasks.stream().mapToLong(Task::getId).forEach(testUtil::deleteTaskById);
 
         assertEquals(nameForSearch, actualTasks.get(0).getName());
         assertEquals(descriptionForSearch, actualTasks.get(0).getDescription());
         assertEquals(statusForSearch, expectedTasks.get(0).getStatus());
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        testUtil.clearBase();
     }
 
     private List<Task> addThreeTasksWithSameDescription() {
