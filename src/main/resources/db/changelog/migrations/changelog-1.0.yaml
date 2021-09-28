@@ -249,3 +249,37 @@ databaseChangeLog:
                   constraints:
                     nullable: true
             tableName: user
+
+  - changeSet:
+      id: 0000011-adding-test-project
+      author: Vlad Yushkov
+      changes:
+        - insert:
+            tableName: project
+            columns:
+              - column:
+                  name: name
+                  value: test_project
+              - column:
+                  name: status
+                  value: IN_PROGRESS
+              - column:
+                  name: customer_id
+                  value: 1
+              - column:
+                  name: price
+                  value: 2500.00
+
+  - changeSet:
+      id: 0000012-adding-test-release
+      author: Vlad Yushkov
+      changes:
+        - insert:
+            tableName: release
+            columns:
+              - column:
+                  name: version
+                  value: 0.0.2
+              - column:
+                  name: start_time
+                  value: 2021-08-22 19:22:52.388423

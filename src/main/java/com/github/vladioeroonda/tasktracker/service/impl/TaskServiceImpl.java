@@ -20,6 +20,7 @@ import com.github.vladioeroonda.tasktracker.service.ProjectService;
 import com.github.vladioeroonda.tasktracker.service.ReleaseService;
 import com.github.vladioeroonda.tasktracker.service.TaskService;
 import com.github.vladioeroonda.tasktracker.service.UserService;
+import com.github.vladioeroonda.tasktracker.util.Translator;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -88,7 +89,7 @@ public class TaskServiceImpl implements TaskService {
                 .findById(id)
                 .orElseThrow(() -> {
                     TaskNotFoundException exception =
-                            new TaskNotFoundException(String.format("Задача с id #%s не существует", id));
+                            new TaskNotFoundException(String.format(Translator.toLocale("exception.task.not-found-by-id"), id));
                     logger.debug(exception.getMessage(), exception);
                     return exception;
                 });
@@ -105,7 +106,7 @@ public class TaskServiceImpl implements TaskService {
                 .findById(id)
                 .orElseThrow(() -> {
                     TaskNotFoundException exception =
-                            new TaskNotFoundException(String.format("Задача с id #%s не существует", id));
+                            new TaskNotFoundException(String.format(Translator.toLocale("exception.task.not-found-by-id"), id));
                     logger.debug(exception.getMessage(), exception);
                     return exception;
                 });
@@ -118,7 +119,7 @@ public class TaskServiceImpl implements TaskService {
 
         if (taskRepository.findById(id).isEmpty()) {
             TaskNotFoundException exception
-                    = new TaskNotFoundException(String.format("Задача с id #%d не существует.", id));
+                    = new TaskNotFoundException(String.format(Translator.toLocale("exception.task.not-found-by-id"), id));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -136,7 +137,7 @@ public class TaskServiceImpl implements TaskService {
         if (taskRequestDto.getName().length() < minNameLength) {
             TaskBadDataException exception =
                     new TaskBadDataException(
-                            String.format("Слишком короткое имя Задачи - '%s'. Должно быть длиннее %d символов",
+                            String.format(Translator.toLocale("exception.task.too-short-task-name"),
                                     taskRequestDto.getName(),
                                     minNameLength)
                     );
@@ -147,7 +148,7 @@ public class TaskServiceImpl implements TaskService {
         if (taskRequestDto.getDescription().length() < minDescriptionLength) {
             TaskBadDataException exception =
                     new TaskBadDataException(
-                            String.format("Слишком короткое описание Задачи. Должно быть длиннее %d символов", minDescriptionLength)
+                            String.format(Translator.toLocale("exception.task.too-short-task-description"), minDescriptionLength)
                     );
             logger.error(exception.getMessage(), exception);
             throw exception;
@@ -158,7 +159,7 @@ public class TaskServiceImpl implements TaskService {
 
         if (project.getStatus() == ProjectStatus.FINISHED) {
             TaskBadDataException exception =
-                    new TaskBadDataException("Вы пытаетесь добавить задачу в уже закрытый проект");
+                    new TaskBadDataException(Translator.toLocale("exception.task.cant-add-task-to-closed-project"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -169,12 +170,11 @@ public class TaskServiceImpl implements TaskService {
 
         if (release.getFinishTime() != null) {
             TaskBadDataException exception =
-                    new TaskBadDataException("Вы пытаетесь добавить задачу в уже закрытый релиз");
+                    new TaskBadDataException(Translator.toLocale("exception.task.cant-add-task-to-closed-release"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
         taskForSave.setRelease(release);
-
 
         User author =
                 userService.getUserByIdAndReturnEntity(taskRequestDto.getAuthor().getId());
@@ -198,7 +198,7 @@ public class TaskServiceImpl implements TaskService {
 
         if (!file.getContentType().equals("text/csv")) {
             WrongFileTypeException exception =
-                    new WrongFileTypeException("Формат загруженного файла не CSV");
+                    new WrongFileTypeException(Translator.toLocale("exception.task.csv.wrong-format"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -227,7 +227,7 @@ public class TaskServiceImpl implements TaskService {
 
         } catch (IOException e) {
             CSVParsingException exception
-                    = new CSVParsingException("Ошибка при парсе CSV-файла", e);
+                    = new CSVParsingException(Translator.toLocale("exception.task.csv.parse-error"), e);
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -244,7 +244,7 @@ public class TaskServiceImpl implements TaskService {
                 .findById(id)
                 .orElseThrow(() -> {
                     TaskNotFoundException exception =
-                            new TaskNotFoundException(String.format("Задача с id #%d не существует. Удаление невозможно", id));
+                            new TaskNotFoundException(String.format(Translator.toLocale("exception.task.not-found-by-id"), id));
                     logger.error(exception.getMessage(), exception);
                     throw exception;
                 });
@@ -261,9 +261,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Transactional
     @Override
-    public void setAllTasksCancelled(Long id) {
-        releaseService.checkReleaseExistsById(id);
-        taskRepository.setAllTasksCancelled(id);
+    public void setAllTasksCancelled(Long releaseId) {
+        releaseService.checkReleaseExistsById(releaseId);
+        taskRepository.setAllTasksCancelled(releaseId);
     }
 
     private Task convertFromRequestToEntity(TaskRequestDto requestDto) {

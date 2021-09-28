@@ -11,6 +11,7 @@ import com.github.vladioeroonda.tasktracker.repository.ProjectRepository;
 import com.github.vladioeroonda.tasktracker.service.ProjectManagementService;
 import com.github.vladioeroonda.tasktracker.service.ReleaseService;
 import com.github.vladioeroonda.tasktracker.service.TaskService;
+import com.github.vladioeroonda.tasktracker.util.Translator;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
 
         if (projectRequestDto.getProjectStatus() != ProjectStatus.FINISHED) {
             ProjectClosingException exception =
-                    new ProjectClosingException("Вы пытаетесь сменить статус проекта на отличный от FINISHED");
+                    new ProjectClosingException(Translator.toLocale("exception.project-management.wrong-status"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -58,14 +59,14 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
                 .orElseThrow(() -> {
                     ProjectNotFoundException exception =
                             new ProjectNotFoundException(
-                                    String.format("Проект с id #%d не существует. Закрытие невозможно", projectRequestDto.getId())
+                                    String.format(Translator.toLocale("exception.project.not-found-by-id"), projectRequestDto.getId())
                             );
                     logger.error(exception.getMessage(), exception);
                     return exception;
                 });
 
         if (projectFromBD.getStatus() == ProjectStatus.FINISHED) {
-            ProjectClosingException exception = new ProjectClosingException("Данный проект уже закрыт!");
+            ProjectClosingException exception = new ProjectClosingException(Translator.toLocale("exception.project-management.project-already-closed"));
             logger.error(exception.getMessage(), exception);
             throw exception;
         }
@@ -77,7 +78,7 @@ public class ProjectManagementServiceImpl implements ProjectManagementService {
         if (notClosedReleases.size() > 0) {
             ProjectClosingException exception =
                     new ProjectClosingException(
-                            String.format("Вы пытаетесь закрыть проект, в котором остались незакрытые релизы (%d)", notClosedReleases.size())
+                            String.format(Translator.toLocale("exception.project-management.not-closed-releases"), notClosedReleases.size())
                     );
             logger.error(exception.getMessage(), exception);
             throw exception;
